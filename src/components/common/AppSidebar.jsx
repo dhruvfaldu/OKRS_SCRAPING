@@ -14,9 +14,21 @@ export default function AppSidebar() {
     const dispatch = useDispatch();
     const isCollapsed = state === "collapsed";
 
-    const handleLogout = () => {
-        dispatch(logout());
-        navigate("/login", { replace: true });
+    const handleLogout = async () => {
+        try {
+            // Wait until API call and Redux state update complete
+            await dispatch(logout()).unwrap();
+
+            // Close mobile sidebar if open
+            if (isMobile) {
+                setOpenMobile(false);
+            }
+
+            // Redirect after successful logout
+            navigate("/login", { replace: true });
+        } catch (error) {
+            console.error("Logout failed:", error);
+        }
     };
 
     const menuItems = [
@@ -90,7 +102,7 @@ export default function AppSidebar() {
                 <SidebarFooter className="p-3 border-t border-sidebar-border">
                     <button
                         onClick={handleLogout}
-                        className="w-full flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium text-sidebar-foreground hover:bg-sidebar-accent/60 hover:text-sidebar-accent-foreground transition-colors"
+                        className="w-full flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium text-sidebar-foreground hover:bg-sidebar-accent/60 hover:text-sidebar-accent-foreground transition-colors cursor-pointer"
                     >
                         <LogOut size={18} className="shrink-0" />
                         {!isCollapsed && <span>Log Out</span>}

@@ -1,32 +1,41 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { registerUser, loginUser } from "../../api/authApi";
+import { registerUser, loginUser, logoutUser } from "../../api/authApi";
 
-export const register = createAsyncThunk(
-  "auth/register",
-  async (userData, thunkAPI) => {
-    try {
-      const data = await registerUser(userData);
-      return data;
-    } catch (err) {
-      return thunkAPI.rejectWithValue(
-        err.response?.data?.message || "Registration failed"
-      );
-    }
+export const register = createAsyncThunk("auth/register", async (userData, thunkAPI) => {
+  try {
+    const data = await registerUser(userData);
+    return data;
+  } catch (err) {
+    return thunkAPI.rejectWithValue(
+      err.response?.data?.message || "Registration failed"
+    );
   }
+}
 );
 
-export const login = createAsyncThunk(
-  "auth/login",
-  async (userData, thunkAPI) => {
-    try {
-      const data = await loginUser(userData);
-      return data;
-    } catch (err) {
-      return thunkAPI.rejectWithValue(
-        err.response?.data?.message || "Login failed"
-      );
-    }
+export const login = createAsyncThunk("auth/login", async (userData, thunkAPI) => {
+  try {
+    const data = await loginUser(userData);
+    return data;
+  } catch (err) {
+    return thunkAPI.rejectWithValue(
+      err.response?.data?.message || "Login failed"
+    );
   }
+}
+);
+
+//logout
+export const logout = createAsyncThunk("auth/logout", async (_, thunkAPI) => {
+  try {
+    const data = await logoutUser();
+    return data;
+  } catch (err) {
+    return thunkAPI.rejectWithValue(
+      err.response?.data?.message || "Logout failed"
+    );
+  }
+}
 );
 
 let storedUser = null;
@@ -50,14 +59,14 @@ const authSlice = createSlice({
   },
 
   reducers: {
-    logout: (state) => {
-      state.user = null;
-      state.token = null;
-      state.isAuthenticated = false;
-      localStorage.removeItem("token");
-      localStorage.removeItem("user");
-      console.log("User logged out");
-    },
+    // logout: (state) => {
+    //   state.user = null;
+    //   state.token = null;
+    //   state.isAuthenticated = false;
+    //   localStorage.removeItem("token");
+    //   localStorage.removeItem("user");
+    //   console.log("User logged out");
+    // },
 
     clearError: (state) => {
       state.error = null;
@@ -65,6 +74,8 @@ const authSlice = createSlice({
   },
 
   extraReducers: (builder) => {
+
+    // Register
     builder
       .addCase(register.pending, (state) => {
         state.loading = true;
@@ -93,6 +104,7 @@ const authSlice = createSlice({
         state.error = action.payload;
       })
 
+      // Login
       .addCase(login.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -118,8 +130,51 @@ const authSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       });
+
+    // Logout
+    // builder.addCase(logout.pending, (state) => {
+    //   state.loading = true;
+    //   state.error = null;
+    // })
+    // .addCase(logout.fulfilled, (state) => {
+    //   state.loading = false;
+    //   state.user = null;
+    //   state.token = null;
+    //   state.isAuthenticated = false;
+    //   localStorage.removeItem("token");
+    //   localStorage.removeItem("user");
+    //   console.log("User logged out successfully");
+    // })
+    // .addCase(logout.rejected, (state, action) => {
+    //   state.loading = false;
+    //   state.error = action.payload;
+    // });
+
+    builder.addCase(logout.pending, (state) => {
+      state.loading = true;
+      state.error = null;
+    })
+      .addCase(logout.fulfilled, (state) => {
+        state.loading = false;
+        state.user = null;
+        state.token = null;
+        state.isAuthenticated = false;
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+        console.log("User logged out successfully");
+      })
+      .addCase(logout.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+        // Also clear local state on logout error so user is not stuck
+        state.user = null;
+        state.token = null;
+        state.isAuthenticated = false;
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+      });
   },
 });
 
-export const { logout, clearError } = authSlice.actions;
+export const { clearError } = authSlice.actions;
 export default authSlice.reducer;

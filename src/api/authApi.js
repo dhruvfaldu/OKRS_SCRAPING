@@ -2,22 +2,28 @@ import axios from "axios";
 
 const API = axios.create({
   baseURL: "https://moral-bullfrog-loyal.ngrok-free.app/api",
+  // Send cookies
 });
 
-
+// Request Interceptor
 API.interceptors.request.use(
   (config) => {
-
-    // Ensure headers object exists
     config.headers = config.headers || {};
 
-    // Add ngrok header (must use bracket notation because of hyphens)
+    // ngrok header
     config.headers["ngrok-skip-browser-warning"] = "true";
+
+    // Add token if available
+    const token = localStorage.getItem("token");
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
 
     return config;
   },
   (error) => Promise.reject(error)
 );
+
 // REGISTER
 export const registerUser = async (data) => {
   const res = await API.post("/auth/register", data);
@@ -27,6 +33,12 @@ export const registerUser = async (data) => {
 // LOGIN
 export const loginUser = async (data) => {
   const res = await API.post("/auth/login", data);
+  return res.data;
+};
+
+// LOGOUT
+export const logoutUser = async () => {
+  const res = await API.post("/auth/logout");
   return res.data;
 };
 
@@ -41,3 +53,5 @@ export const resetPassword = async (data) => {
   const res = await API.post("/auth/reset-password", data);
   return res.data;
 };
+
+export default API;

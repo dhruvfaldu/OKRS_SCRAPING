@@ -42,7 +42,7 @@ const ResultsPage = () => {
   );
 
   return (
-    <div className="p-6 bg-background min-h-screen">
+    <div className="p-6 bg-background text-foreground min-h-screen">
 
       <h1 className="text-2xl font-bold text-foreground mb-6">
         Scraped Results

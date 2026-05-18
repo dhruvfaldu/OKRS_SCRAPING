@@ -4,14 +4,13 @@ import { Badge } from "@/components/ui/badge";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { RiDeleteBin5Line } from "react-icons/ri";
-import { BarChart } from "lucide-react";
+import { BarChart, RotateCw } from "lucide-react";
 import { BsPlayFill } from "react-icons/bs";
 import { FaLink } from "react-icons/fa6";
 import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogAction, AlertDialogCancel, AlertDialogTrigger, } from "@/components/ui/alert-dialog";
 import { useDispatch } from "react-redux";
-import { deleteJob } from "../../store/slices/jobSlice";
+import { deleteJob, retryJob } from "../../store/slices/jobSlice";
 import { toast } from "react-toastify";
-
 
 function JobCard({ job }) {
   const [deleting, setDeleting] = useState(false);
@@ -32,33 +31,22 @@ function JobCard({ job }) {
 
   const firstLetter = (job?.name || "J").charAt(0).toUpperCase();
 
-  const showActionButton =
-    status === "completed" ||
-    status === "failed" ||
-    status === "running";
+  const showActionButton = status === "completed" || status === "failed";
 
   const getActionButton = () => {
-    if (status === "running") {
-      return (
-        <Button
-          disabled
-          className="flex-1 bg-blue-600 text-white cursor-not-allowed"
-        >
-          <RotateCw className="w-4 h-4 mr-1 animate-spin" />
-          Running...
-        </Button>
-      );
-    }
 
     if (status === "failed") {
       return (
         <Button
           className="flex-1 bg-red-600 hover:bg-red-700 text-white cursor-pointer"
           onClick={() => {
+            dispatch(retryJob(job.id)).unwrap()
+              .then(() => toast.success(`Job "${job?.name}" is being retried`))
+              .catch((err) => toast.error(err?.message || `Failed to retry job "${job?.name}"`));
             toast.info(`Retrying "${job?.name}"...`);
           }}
         >
-          {/* <RotateCw  className="w-4 h-4 mr-1" /> */}
+          <RotateCw  className="w-4 h-4 mr-1" />
           Retry
         </Button>
       );
@@ -69,6 +57,9 @@ function JobCard({ job }) {
         <Button
           className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90 cursor-pointer"
           onClick={() => {
+            dispatch(retryJob(job.id)).unwrap()
+              .then(() => toast.success(`Job "${job?.name}" is being run`))
+              .catch((err) => toast.error(err?.message || `Failed to run job "${job?.name}"`));
             toast.info(`Running "${job?.name}"...`);
           }}
         >
@@ -105,20 +96,8 @@ function JobCard({ job }) {
 
       {/* Footer */}
       <div className="flex gap-2 px-4 pb-4">
+        {/*Run Action Button */}
         {showActionButton && getActionButton()}
-
-        {/* Run Button */}
-        {/* <Button
-          className="flex-1 bg-primary text-primary-foreground hover:bg-primary/80 cursor-pointer"
-          disabled={status === "running"}
-          onClick={() => {
-            // setRunning(true);
-            // setTimeout(() => setRunning(false), 600);
-            toast.info(`Running "${job?.name}"...`);
-          }}
-        >
-          {status === "running" ? "Running..." : <><BsPlayFill /> Run</>}
-        </Button> */}
 
         {/* Results Button */}
         <Button
