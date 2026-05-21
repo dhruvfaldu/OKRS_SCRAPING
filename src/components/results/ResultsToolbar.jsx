@@ -14,7 +14,7 @@ export default function ResultsToolbar({ search, setSearch, onExport, view, onVi
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Search across all fields..."
-          className="h-10 rounded-lg pl-10 pr-9"
+          className="h-10 rounded-lg pl-10 pr-9 bg-muted/50 placeholder:text-muted-foreground focus:bg-muted focus:ring-0 focus-visible:ring-0 focus-visible:ring-offset-0"
         />
         {hasSearch && (
           <button

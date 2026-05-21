@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const API = axios.create({
-  baseURL: "https://moral-bullfrog-loyal.ngrok-free.app/api",
+  baseURL: "https://db95-2a09-bac5-3e0c-16b4-00-243-9d.ngrok-free.app/api",
 });
 
 API.interceptors.request.use(

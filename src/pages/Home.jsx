@@ -12,8 +12,8 @@ function Home() {
     const { items: jobs = [], isLoading } = useSelector((state) => state.jobs);
     const { user } = useSelector((state) => state.auth);
 
-    // const [jobStatusMap, setJobStatusMap] = useLocalStorage("jobStatus", {});
-    // const [lastRunJobId, setLastRunJobId] = useLocalStorage("lastRunJobId", null);
+    const [jobStatusMap, setJobStatusMap] = useLocalStorage("jobStatus", {});
+    const [lastRunJobId, setLastRunJobId] = useLocalStorage("lastRunJobId", null);
 
     useEffect(() => {
         dispatch(fetchJobs());
@@ -21,8 +21,8 @@ function Home() {
 
     const count = jobs.length;
     // TODO: When backend is available, remove useLocalStorage and uncomment the below code
-    const completedCount = jobs.filter((job) => job?.status === "completed").length;
-    // const completedCount = jobs.filter((job) => (jobStatusMap[job.id] || job?.status || "pending").toLowerCase() === "completed").length;
+    // const completedCount = jobs.filter((job) => job?.status === "completed").length;
+    const completedCount = jobs.filter((job) => (jobStatusMap[job.id] || job?.status || "pending").toLowerCase() === "completed").length;
 
     const pendingCount = count - completedCount;
 
@@ -35,23 +35,23 @@ function Home() {
         if (lastJob) {
             // TODO: When backend is available, remove useLocalStorage and uncomment the old code
 
-            setRunningLast(true);
-            setTimeout(() => setRunningLast(false), 600);
-
-
             // setRunningLast(true);
-            // setJobStatusMap({ ...jobStatusMap, [lastJob.id]: "running" });
-            // setLastRunJobId(lastJob.id);
+            // setTimeout(() => setRunningLast(false), 600);
 
-            // const delay = Math.random() * 2000 + 1000; // 1–3 sec realistic delay
 
-            // setTimeout(() => {
-            //     setJobStatusMap((prev) => ({
-            //         ...prev,
-            //         [lastJob.id]: "completed",
-            //     }));
-            //     setRunningLast(false);
-            // }, delay);
+            setRunningLast(true);
+            setJobStatusMap({ ...jobStatusMap, [lastJob.id]: "running" });
+            setLastRunJobId(lastJob.id);
+
+            const delay = Math.random() * 2000 + 1000; // 1–3 sec realistic delay
+
+            setTimeout(() => {
+                setJobStatusMap((prev) => ({
+                    ...prev,
+                    [lastJob.id]: "completed",
+                }));
+                setRunningLast(false);
+            }, delay);
         }
     };
 
@@ -112,7 +112,7 @@ function Home() {
                 </div>
 
                 {/* 3. Quick Actions */}
-                <div>
+                {/* <div>
                     <h2 className="text-lg font-semibold flex items-center gap-2 mb-4">
                         <Zap size={20} className="text-primary" /> Quick Actions
                     </h2>
@@ -130,7 +130,7 @@ function Home() {
                             View Latest Results
                         </Link>
                     </div>
-                </div>
+                </div> */}
 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     {/* 4. Recent Activity */}
@@ -147,8 +147,8 @@ function Home() {
                                             <div>
                                                 <p className="text-sm font-medium text-foreground">
                                                     {/* TODO: When backend is available, uncomment below and remove the jobStatusMap logic */}
-                                                    Job <span className="font-bold text-primary">{job.name}</span> was {job.status === 'completed' ? 'completed successfully' : 'created'}
-                                                    {/* Job <span className="font-bold text-primary">{job.name}</span> was {(jobStatusMap[job.id] || job.status || "pending").toLowerCase() === 'completed' ? 'completed successfully' : 'created'} */}
+                                                    {/* Job <span className="font-bold text-primary">{job.name}</span> was {job.status === 'completed' ? 'completed successfully' : 'created'} */}
+                                                    Job <span className="font-bold text-primary">{job.name}</span> was {(jobStatusMap[job.id] || job.status || "pending").toLowerCase() === 'completed' ? 'completed successfully' : 'created'}
                                                 </p>
                                                 <p className="text-xs text-muted-foreground mt-1">Recently</p>
                                             </div>
@@ -192,18 +192,19 @@ function Home() {
                                                     <td className="px-5 py-4 font-medium text-foreground truncate max-w-[150px]">{job.name}</td>
                                                     <td className="px-5 py-4">
                                                         {/* TODO: When backend is available, uncomment below and remove the jobStatusMap logic */}
-                                                        <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold border ${(job.status || "pending").toLowerCase() === "completed" ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/30" :
+                                                        {/* <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold border ${(job.status || "pending").toLowerCase() === "completed" ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/30" :
                                                             (job.status || "pending").toLowerCase() === "running" ? "bg-blue-500/10 text-blue-600 border-blue-500/30" :
-                                                                "bg-amber-500/10 text-amber-600 border-amber-500/30"
+                                                                (job.status || "pending").toLowerCase() === "failed" ? "bg-red-500/10 text-red-600 border-red-500/30" :
+                                                                    "bg-amber-500/10 text-amber-600 border-amber-500/30"
                                                             }`}>
                                                             {job.status || "pending"}
-                                                        </span>
-                                                        {/* <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold border ${(jobStatusMap[job.id] || job.status || "pending").toLowerCase() === "completed" ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/30" :
+                                                        </span> */}
+                                                        <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold border ${(jobStatusMap[job.id] || job.status || "pending").toLowerCase() === "completed" ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/30" :
                                                             (jobStatusMap[job.id] || job.status || "pending").toLowerCase() === "running" ? "bg-blue-500/10 text-blue-600 border-blue-500/30" :
                                                                 "bg-amber-500/10 text-amber-600 border-amber-500/30"
                                                             }`}>
                                                             {jobStatusMap[job.id] || job.status || "pending"}
-                                                        </span> */}
+                                                        </span>
                                                     </td>
                                                     <td className="px-5 py-4 text-right">
                                                         <button

@@ -6,11 +6,19 @@ import { logout } from "../../store/slices/authSlice";
 import { LogOut } from "lucide-react";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Moon, Sun } from 'lucide-react'
+import { useTheme } from 'next-themes'
+import { Button } from '@/components/ui/button'
 
 const Navbar = () => {
     const { isAuthenticated, user } = useSelector((state) => state.auth);
+    const { theme, setTheme } = useTheme();
     const dispatch = useDispatch();
     const navigate = useNavigate();
+
+    const toggleTheme = () => {
+        setTheme(theme === 'light' ? 'dark' : 'light');
+    };
 
     const handleLogout = () => {
         dispatch(logout());
@@ -31,7 +39,19 @@ const Navbar = () => {
                     <SidebarTrigger className="hidden md:inline-flex" />
                 </div>
 
-                <div className="flex gap-2">
+                <div className="flex justify-center items-center gap-3">
+                    <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={toggleTheme}
+                        className="cursor-pointer bg-muted hover:bg-muted/80 text-muted-foreground hover:text-foreground"
+                    >
+                        {theme === 'dark' ? (
+                            <Sun className="h-5 w-5" />
+                        ) : (
+                            <Moon className="h-5 w-5 " />
+                        )}
+                    </Button>
                     {isAuthenticated ? (
                         <DropdownMenu>
                             {/* Avatar Trigger */}

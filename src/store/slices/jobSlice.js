@@ -63,7 +63,7 @@ const jobSlice = createSlice({
       state.error = null;
     });
     builder.addCase(fetchJobs.fulfilled, (state, action) => {
-      state.items = (action.payload.data || []).slice().reverse();
+      state.items = (action.payload.data || []);
       state.isLoading = false;
       state.isFetching = false;
     });

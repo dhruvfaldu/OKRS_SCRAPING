@@ -60,41 +60,23 @@ function JobForm() {
                     for (let i = 0; i < parsedSelectors.length; i++) {
                         const item = parsedSelectors[i];
 
-                        if (
-                            item === null ||
-                            Array.isArray(item) ||
-                            typeof item !== "object"
-                        ) {
-                            selectorsError =
-                                `Selector at index ${i} must be a valid object`;
+                        if (item === null || Array.isArray(item) || typeof item !== "object") {
+                            selectorsError = `Selector at index ${i} must be a valid object`;
                             break;
                         }
 
-                        if (
-                            typeof item.name !== "string" ||
-                            !item.name.trim()
-                        ) {
-                            selectorsError =
-                                `Selector at index ${i} is missing required "name"`;
+                        if (typeof item.name !== "string" || !item.name.trim()) {
+                            selectorsError = `Selector at index ${i} is missing required "name"`;
                             break;
                         }
 
-                        if (
-                            typeof item.selector !== "string" ||
-                            !item.selector.trim()
-                        ) {
-                            selectorsError =
-                                `Selector "${item.name}" is missing required "selector"`;
+                        if (typeof item.selector !== "string" || !item.selector.trim()) {
+                            selectorsError = `Selector "${item.name}" is missing required "selector"`;
                             break;
                         }
 
-                        if (
-                            item.attribute !== undefined &&
-                            item.attribute !== null &&
-                            typeof item.attribute !== "string"
-                        ) {
-                            selectorsError =
-                                `Selector "${item.name}" has invalid "attribute"`;
+                        if (item.attribute !== undefined && item.attribute !== null && typeof item.attribute !== "string") {
+                            selectorsError = `Selector "${item.name}" has invalid "attribute"`;
                             break;
                         }
                     }
@@ -110,11 +92,7 @@ function JobForm() {
         try {
             parsedPagination = JSON.parse(trimmedPagination);
 
-            if (
-                parsedPagination === null ||
-                Array.isArray(parsedPagination) ||
-                typeof parsedPagination !== "object"
-            ) {
+            if (parsedPagination === null || Array.isArray(parsedPagination) || typeof parsedPagination !== "object") {
                 paginationError = "Pagination JSON must be a valid object";
             }
         } catch (err) {
@@ -125,10 +103,7 @@ function JobForm() {
     const isValidHttpUrl = (value) => {
         try {
             const parsed = new URL(value);
-            return (
-                parsed.protocol === "http:" ||
-                parsed.protocol === "https:"
-            );
+            return (parsed.protocol === "http:" || parsed.protocol === "https:");
         } catch {
             return false;
         }
@@ -158,17 +133,11 @@ function JobForm() {
                 ? event.target.checked
                 : event.target.value;
 
-        setForm((prev) => ({
-            ...prev,
-            [field]: value,
-        }));
+        setForm((prev) => ({ ...prev, [field]: value, }));
     };
 
     const onBlurField = (field) => () => {
-        setTouched((prev) => ({
-            ...prev,
-            [field]: true,
-        }));
+        setTouched((prev) => ({ ...prev, [field]: true, }));
     };
 
     const handleSubmit = async (event) => {
@@ -214,19 +183,13 @@ function JobForm() {
         } catch (err) {
             setIsError(true);
             setError(err);
-
-            toast.error(
-                err?.response?.data?.message ||
-                err?.message ||
-                "Failed to create job"
-            );
+            toast.error(err?.response?.data?.message || err?.message || "Failed to create job");
         } finally {
             setIsPending(false);
         }
     };
 
-    const inputClass =
-        "w-full bg-input border border-border text-foreground placeholder:text-muted-foreground rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-ring transition-all";
+    const inputClass = "w-full bg-input border border-border text-foreground placeholder:text-muted-foreground rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-ring transition-all";
 
     return (
         <div className="text-foreground">
@@ -444,9 +407,7 @@ function JobForm() {
                             className="w-full sm:w-auto flex-1 py-3 px-6 rounded-xl bg-primary text-primary-foreground hover:bg-primary/80 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-semibold transition-all flex items-center justify-center gap-2"
                         >
                             <Plus size={16} />
-                            {isPending
-                                ? "Creating..."
-                                : "Create Job"}
+                            {isPending ? "Creating..." : "Create Job"}
                         </button>
                     </div>
                 </form>

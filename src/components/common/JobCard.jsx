@@ -46,7 +46,7 @@ function JobCard({ job }) {
             toast.info(`Retrying "${job?.name}"...`);
           }}
         >
-          <RotateCw  className="w-4 h-4 mr-1" />
+          <RotateCw className="w-4 h-4 mr-1" />
           Retry
         </Button>
       );
@@ -76,26 +76,45 @@ function JobCard({ job }) {
   return (
     <Card className="bg-card text-card-foreground border border-border hover:border-primary/50 transition-all rounded-2xl shadow-sm hover:shadow-md">
       {/* Header */}
-      <CardHeader className="flex flex-row items-start justify-between gap-2 space-y-0">
-        <div className="flex-1 min-w-0">
-          <CardTitle className="text-foreground text-lg truncate">
-            {job?.name || "Amazon Product Scraper"}
-          </CardTitle>
+      <CardHeader className="flex flex-row items-start justify-between gap-3 space-y-0">
+        {/* Left Side */}
+        <div className="flex items-center gap-3 min-w-0 flex-1">
 
-          <CardDescription className="flex gap-1 items-center text-muted-foreground text-xs truncate mt-1">
-            <div>
-              <FaLink />
-            </div> {job?.url || "https://amazon.com/..."}
-          </CardDescription>
+          {/* First Letter Avatar */}
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-muted text-xl font-medium text-muted-foreground">
+            {firstLetter}
+          </span>
+
+          {/* Title + URL */}
+          <div className="min-w-0 flex-1">
+            <CardTitle className="truncate text-lg text-foreground">
+              {job?.name || "Amazon Product Scraper"}
+            </CardTitle>
+
+            <CardDescription className="mt-1 flex items-center gap-1 text-xs text-muted-foreground">
+              <FaLink className="shrink-0" />
+
+              <span className="truncate">
+                {job?.url || "https://amazon.com/..."}
+              </span>
+            </CardDescription>
+          </div>
         </div>
 
-        <Badge className={`capitalize px-2.5 py-1 text-xs border ${statusClass}`}>
+        {/* Status Badge */}
+        <Badge
+          className={`shrink-0 capitalize border px-2.5 py-1 text-xs ${statusClass}`}
+        >
           {status}
         </Badge>
       </CardHeader>
 
+      {/* //horizontal line */}
+      <div className="border-t border-border mx-5" />
+
+
       {/* Footer */}
-      <div className="flex gap-2 px-4 pb-4">
+      <div className="flex gap-2 px-4 pb-3">
         {/*Run Action Button */}
         {showActionButton && getActionButton()}
 

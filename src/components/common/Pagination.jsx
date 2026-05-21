@@ -23,7 +23,7 @@ function Pagination({ page, setPage, hasNextPage, maxpages }) {
 
   return (
     <div className="flex items-center justify-between mt-6 px-2">
-      
+
       {/* LEFT INFO */}
       <p className="text-sm text-muted-foreground hidden sm:block">
         Page <span className="font-medium text-foreground">{page}</span> of{" "}
@@ -54,16 +54,14 @@ function Pagination({ page, setPage, hasNextPage, maxpages }) {
               onClick={() => typeof p === "number" && setPage(p)}
               disabled={typeof p === "string"}
               className={`min-w-[36px] h-9 px-2 rounded-lg text-sm border transition-all
-              ${
-                p === page
+              ${p === page
                   ? "bg-primary text-white border-primary shadow-sm"
                   : "hover:bg-accent border-border"
-              }
-              ${
-                typeof p === "string"
+                }
+              ${typeof p === "string"
                   ? "cursor-default opacity-50"
                   : "cursor-pointer"
-              }
+                }
               `}
             >
               {p}
@@ -76,11 +74,10 @@ function Pagination({ page, setPage, hasNextPage, maxpages }) {
           onClick={() => setPage(page + 1)}
           disabled={!hasNextPage}
           className={`px-3 py-1.5 rounded-lg border text-sm transition-all
-          ${
-            !hasNextPage
+          ${!hasNextPage
               ? "opacity-40 cursor-not-allowed"
               : "hover:bg-accent hover:border-primary"
-          }
+            }
           `}
         >
           Next →

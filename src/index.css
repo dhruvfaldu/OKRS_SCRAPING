@@ -1,6 +1,6 @@
 @import "tailwindcss";
 
-@custom-variant dark (&:is(.dark *));
+@custom-variant dark (&:where(.dark, .dark *));
 
 :root {
   --background: oklch(0.9730 0.0133 286.1503);
@@ -170,4 +170,8 @@
   body {
     @apply bg-background text-foreground;
   }
+  button:not(:disabled) {
+    @apply cursor-pointer;
+  }
 }
+
