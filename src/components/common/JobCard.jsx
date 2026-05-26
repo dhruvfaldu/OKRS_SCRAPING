@@ -1,184 +1,267 @@
+import React, { useState } from "react";
 import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { RiDeleteBin5Line } from "react-icons/ri";
-import { BarChart, RotateCw } from "lucide-react";
-import { BsPlayFill } from "react-icons/bs";
-import { FaLink } from "react-icons/fa6";
-import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogAction, AlertDialogCancel, AlertDialogTrigger, } from "@/components/ui/alert-dialog";
+import { BarChart, RotateCw, Globe, Play, ExternalLink, Calendar, Code } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { useDispatch } from "react-redux";
 import { deleteJob, retryJob } from "../../store/slices/jobSlice";
-import { toast } from "react-toastify";
+import { toast } from "sonner";
+import Loader from "../loaders/Loader";
 
-function JobCard({ job }) {
+export default function JobCard({ job }) {
   const [deleting, setDeleting] = useState(false);
+  const [running, setRunning] = useState(false);
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
   const status = (job?.status || "pending").toLowerCase();
 
+  const statusColors = {
+    completed: "bg-emerald-500/10 text-emerald-600 border-emerald-500/25",
+    running: "bg-blue-500/10 text-blue-600 border-blue-500/25",
+    failed: "bg-red-500/10 text-red-600 border-red-500/25",
+    pending: "bg-amber-500/10 text-amber-600 border-amber-500/25",
+  };
+
   const statusClass =
-    status === "completed"
-      ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/30"
-      : status === "running"
-        ? "bg-blue-500/10 text-blue-600 border-blue-500/30"
-        : status === "failed"
-          ? "bg-red-500/10 text-red-600 border-red-500/30"
-          : "bg-amber-500/10 text-amber-600 border-amber-500/30";
+    statusColors[status] || "bg-muted text-muted-foreground border-border";
 
   const firstLetter = (job?.name || "J").charAt(0).toUpperCase();
 
-  const showActionButton = status === "completed" || status === "failed";
-
-  const getActionButton = () => {
-
-    if (status === "failed") {
-      return (
-        <Button
-          className="flex-1 bg-red-600 hover:bg-red-700 text-white cursor-pointer"
-          onClick={() => {
-            dispatch(retryJob(job.id)).unwrap()
-              .then(() => toast.success(`Job "${job?.name}" is being retried`))
-              .catch((err) => toast.error(err?.message || `Failed to retry job "${job?.name}"`));
-            toast.info(`Retrying "${job?.name}"...`);
-          }}
-        >
-          <RotateCw className="w-4 h-4 mr-1" />
-          Retry
-        </Button>
-      );
+  const getCleanDomain = (urlStr) => {
+    try {
+      const parsed = new URL(urlStr);
+      return parsed.hostname.replace("www.", "");
+    } catch {
+      return "External Link";
     }
-
-    if (status === "completed") {
-      return (
-        <Button
-          className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90 cursor-pointer"
-          onClick={() => {
-            dispatch(retryJob(job.id)).unwrap()
-              .then(() => toast.success(`Job "${job?.name}" is being run`))
-              .catch((err) => toast.error(err?.message || `Failed to run job "${job?.name}"`));
-            toast.info(`Running "${job?.name}"...`);
-          }}
-        >
-          <BsPlayFill className="w-4 h-4" />
-          Run Job
-        </Button>
-      );
-    }
-
-    return null;
   };
 
+  const handleRunOrRetry = () => {
+    setRunning(true);
+
+    dispatch(retryJob(job.id))
+      .unwrap()
+      .then(() => {
+        toast.success(`Job "${job?.name}" is now executing!`);
+      })
+      .catch((err) => {
+        toast.error(err?.message || `Failed to trigger "${job?.name}".`);
+      })
+      .finally(() => {
+        setRunning(false);
+      });
+
+    toast.info(`Deploying workers for "${job?.name}"...`);
+  };
 
   return (
-    <Card className="bg-card text-card-foreground border border-border hover:border-primary/50 transition-all rounded-2xl shadow-sm hover:shadow-md">
-      {/* Header */}
-      <CardHeader className="flex flex-row items-start justify-between gap-3 space-y-0">
-        {/* Left Side */}
-        <div className="flex items-center gap-3 min-w-0 flex-1">
+    <Card className="bg-card border border-border/80 hover:border-primary/50 hover:shadow-lg transition-all duration-300 rounded-3xl overflow-hidden flex flex-col justify-between group">
 
-          {/* First Letter Avatar */}
-          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-muted text-xl font-medium text-muted-foreground">
+      {/* Header */}
+      <CardHeader className="p-5 space-y-4">
+
+        {/* Status */}
+        <div className="flex justify-between items-center">
+          <Badge className="bg-muted text-muted-foreground border border-border hover:bg-muted/80 text-[10px] font-bold uppercase tracking-wider rounded-lg select-none px-2 py-0.5">
+            {job?.mode === "full_page" ? "HTML Page" : "Selectors Mode"}
+          </Badge>
+
+          <Badge
+            className={`capitalize border font-semibold text-[10px] px-2.5 py-0.5 rounded-full flex items-center gap-1.5 ${statusClass}`}
+          >
+            <span
+              className={`h-1.5 w-1.5 rounded-full ${status === "completed"
+                  ? "bg-emerald-500"
+                  : status === "running"
+                    ? "bg-blue-500 animate-ping"
+                    : status === "failed"
+                      ? "bg-red-500"
+                      : "bg-amber-500 animate-pulse"
+                }`}
+            />
+            <span>{status}</span>
+          </Badge>
+        </div>
+
+        {/* Title + URL */}
+        <div className="flex items-start gap-4">
+          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-primary/10 border border-primary/15 text-lg font-bold text-primary select-none group-hover:scale-105 transition-transform">
             {firstLetter}
           </span>
 
-          {/* Title + URL */}
-          <div className="min-w-0 flex-1">
-            <CardTitle className="truncate text-lg text-foreground">
-              {job?.name || "Amazon Product Scraper"}
+          <div className="min-w-0 flex-1 space-y-1">
+            <CardTitle
+              className="truncate text-base font-bold text-foreground leading-snug group-hover:text-primary transition-colors"
+              title={job?.name}
+            >
+              {job?.name || "Target Web Scraper"}
             </CardTitle>
 
-            <CardDescription className="mt-1 flex items-center gap-1 text-xs text-muted-foreground">
-              <FaLink className="shrink-0" />
+            <CardDescription className="flex items-center gap-1.5 text-xs text-muted-foreground">
+              <Globe className="w-3.5 h-3.5 shrink-0 text-muted-foreground/60" />
 
-              <span className="truncate">
-                {job?.url || "https://amazon.com/..."}
-              </span>
+              <a
+                href={job?.url}
+                target="_blank"
+                rel="noreferrer"
+                className="truncate hover:underline hover:text-foreground inline-flex items-center gap-1"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <span>{getCleanDomain(job?.url)}</span>
+                <ExternalLink className="w-2.5 h-2.5 shrink-0" />
+              </a>
             </CardDescription>
           </div>
         </div>
-
-        {/* Status Badge */}
-        <Badge
-          className={`shrink-0 capitalize border px-2.5 py-1 text-xs ${statusClass}`}
-        >
-          {status}
-        </Badge>
       </CardHeader>
 
-      {/* //horizontal line */}
-      <div className="border-t border-border mx-5" />
+      <hr className="border-border/60 mx-5" />
 
+      {/* Details */}
+      {/* <div className="px-5 py-4 space-y-2.5 text-xs text-muted-foreground flex-1">
+        <div className="flex items-center justify-between">
+          <span className="flex items-center gap-1.5">
+            <Calendar className="w-3.5 h-3.5 text-muted-foreground/60" />
+            <span>Last trigger</span>
+          </span>
+
+          <span className="font-medium text-foreground">
+            Just recently
+          </span>
+        </div>
+
+        {job?.selectors && Array.isArray(job.selectors) && (
+          <div className="flex items-center justify-between">
+            <span className="flex items-center gap-1.5">
+              <Code className="w-3.5 h-3.5 text-muted-foreground/60" />
+              <span>Target fields</span>
+            </span>
+
+            <span className="font-semibold text-foreground bg-muted px-2 py-0.5 rounded-md border border-border/40 select-none">
+              {job.selectors.length} selectors
+            </span>
+          </div>
+        )}
+      </div> */}
 
       {/* Footer */}
-      <div className="flex gap-2 px-4 pb-3">
-        {/*Run Action Button */}
-        {showActionButton && getActionButton()}
+      <div className="flex gap-2 p-3 bg-muted/10">
 
-        {/* Results Button */}
+        {/* Run Button */}
+        {running ? (
+          <Button disabled className="flex-1 rounded-xl">
+            <Loader size="xs" className="mr-2 text-current" />
+            Deploying...
+          </Button>
+        ) : (
+          (status === "completed" || status === "failed") && (
+            <Button
+              className={`flex-1 rounded-xl font-semibold shadow-2xs hover:shadow-md cursor-pointer ${status === "failed"
+                  ? "bg-red-600 text-white hover:bg-red-700 hover:shadow-red-600/10"
+                  : "bg-primary text-primary-foreground hover:bg-primary/95"
+                }`}
+              onClick={handleRunOrRetry}
+            >
+              {status === "failed" ? (
+                <>
+                  <RotateCw className="w-3.5 h-3.5 mr-1.5" />
+                  Retry Job
+                </>
+              ) : (
+                <>
+                  <Play className="w-3.5 h-3.5 mr-1.5" />
+                  Run Job
+                </>
+              )}
+            </Button>
+          )
+        )}
+
+        {/* Results */}
         <Button
           variant="secondary"
-          className="flex-1 hover:bg-muted cursor-pointer"
+          className="flex-1 rounded-xl font-semibold hover:bg-muted cursor-pointer border border-border/80"
           onClick={() => navigate(`/results/${job.id}`)}
         >
-          <BarChart /> Results
+          <BarChart className="w-3.5 h-3.5 mr-1.5" />
+          Results
         </Button>
 
-        {/* Delete Button */}
+        {/* Delete */}
         <AlertDialog>
           <AlertDialogTrigger asChild>
             <Button
-              variant="destructive"
+              variant="outline"
               size="icon"
               disabled={deleting}
+              className="rounded-xl border border-border/80 hover:border-destructive/30 hover:bg-destructive/10 hover:text-destructive shrink-0 cursor-pointer h-9 w-9 text-muted-foreground"
             >
-              {deleting ? (
-                <div className="loader ease-linear rounded-full border-8 border-t-8 border-gray-200 h-6 w-6 "></div>
-              ) : (
-                <RiDeleteBin5Line />
-              )}
+              <RiDeleteBin5Line size={15} />
             </Button>
           </AlertDialogTrigger>
 
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Delete Job</AlertDialogTitle>
-              <AlertDialogDescription>
-                Are you sure you want to delete this job? This action cannot be undone.
+          <AlertDialogContent className="rounded-3xl border border-border bg-card/95 backdrop-blur-md shadow-2xl p-6 max-w-sm">
+            <AlertDialogHeader className="space-y-2">
+              <AlertDialogTitle className="text-lg font-bold text-foreground">
+                Delete Scraper Workspace?
+              </AlertDialogTitle>
+
+              <AlertDialogDescription className="text-xs text-muted-foreground leading-relaxed">
+                This action is irreversible.
               </AlertDialogDescription>
             </AlertDialogHeader>
 
-            <AlertDialogFooter>
-              <AlertDialogCancel disabled={deleting} className="cursor-pointer">
+            <AlertDialogFooter className="mt-5 gap-2 sm:gap-0">
+              <AlertDialogCancel
+                disabled={deleting}
+                className="rounded-xl cursor-pointer text-xs font-semibold border border-border/85"
+              >
                 Cancel
               </AlertDialogCancel>
 
               <AlertDialogAction
                 disabled={deleting}
-                onClick={() => {
+                onClick={(e) => {
+                  e.preventDefault();
                   setDeleting(true);
 
-                  dispatch(deleteJob(job.id)).unwrap()
-                    .then(() => toast.success("Job deleted successfully"))
-                    .catch((err) => toast.error(err?.message || "Failed to delete job"))
-                    .finally(() => {
+                  dispatch(deleteJob(job.id))
+                    .unwrap()
+                    .then(() => {
+                      toast.success("Scraper deleted successfully");
+                    })
+                    .catch((err) => {
+                      toast.error(err?.message || "Failed to delete workflow");
                       setDeleting(false);
                     });
                 }}
-                className="bg-red-600 cursor-pointer hover:bg-red-700"
+                className="bg-red-600 text-white hover:bg-red-700 rounded-xl cursor-pointer text-xs font-semibold flex items-center justify-center min-w-20"
               >
-                {deleting ? "Deleting..." : "Delete"}
+                {deleting ? (
+                  <Loader size="xs" className="text-white" />
+                ) : (
+                  "Delete Job"
+                )}
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
-
       </div>
     </Card>
   );
 }
-
-export default JobCard;
