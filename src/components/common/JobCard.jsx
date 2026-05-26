@@ -3,7 +3,7 @@ import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/ca
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useNavigate } from "react-router-dom";
-import { RiDeleteBin5Line } from "react-icons/ri";
+import { RiAlarmWarningLine, RiDeleteBin5Line, RiDeleteBin6Line } from "react-icons/ri";
 import { BarChart, RotateCw, Globe, Play, ExternalLink, Calendar, Code } from "lucide-react";
 import {
   AlertDialog,
@@ -86,12 +86,12 @@ export default function JobCard({ job }) {
           >
             <span
               className={`h-1.5 w-1.5 rounded-full ${status === "completed"
-                  ? "bg-emerald-500"
-                  : status === "running"
-                    ? "bg-blue-500 animate-ping"
-                    : status === "failed"
-                      ? "bg-red-500"
-                      : "bg-amber-500 animate-pulse"
+                ? "bg-emerald-500"
+                : status === "running"
+                  ? "bg-blue-500 animate-ping"
+                  : status === "failed"
+                    ? "bg-red-500"
+                    : "bg-amber-500 animate-pulse"
                 }`}
             />
             <span>{status}</span>
@@ -109,7 +109,14 @@ export default function JobCard({ job }) {
               className="truncate text-base font-bold text-foreground leading-snug group-hover:text-primary transition-colors"
               title={job?.name}
             >
-              {job?.name || "Target Web Scraper"}
+              <div className="flex justify-between">
+                {job?.name || "Target Web Scraper"}
+                {job?.mode === "full_page" ? (
+                  <span className="text-xs text-muted-foreground">(Full Page)</span>
+                ) : (
+                  <span className="text-xs text-muted-foreground">(Selectors)</span>
+                )}
+              </div>
             </CardTitle>
 
             <CardDescription className="flex items-center gap-1.5 text-xs text-muted-foreground">
@@ -160,7 +167,7 @@ export default function JobCard({ job }) {
       </div> */}
 
       {/* Footer */}
-      <div className="flex gap-2 p-3 bg-muted/10">
+      <div className="flex gap-2 items-center p-3 bg-muted/10">
 
         {/* Run Button */}
         {running ? (
@@ -172,8 +179,8 @@ export default function JobCard({ job }) {
           (status === "completed" || status === "failed") && (
             <Button
               className={`flex-1 rounded-xl font-semibold shadow-2xs hover:shadow-md cursor-pointer ${status === "failed"
-                  ? "bg-red-600 text-white hover:bg-red-700 hover:shadow-red-600/10"
-                  : "bg-primary text-primary-foreground hover:bg-primary/95"
+                ? "bg-red-600 text-white hover:bg-red-700 hover:shadow-red-600/10"
+                : "bg-primary text-primary-foreground hover:bg-primary/95"
                 }`}
               onClick={handleRunOrRetry}
             >
@@ -209,56 +216,146 @@ export default function JobCard({ job }) {
               variant="outline"
               size="icon"
               disabled={deleting}
-              className="rounded-xl border border-border/80 hover:border-destructive/30 hover:bg-destructive/10 hover:text-destructive shrink-0 cursor-pointer h-9 w-9 text-muted-foreground"
+              className="
+        group relative h-10 w-10 shrink-0 overflow-hidden
+        rounded-2xl border border-border/70
+        bg-background/60 backdrop-blur-sm
+        transition-all duration-300
+        hover:border-red-500/30
+        hover:bg-red-500/10
+        hover:shadow-lg hover:shadow-red-500/10
+        active:scale-95
+        disabled:pointer-events-none disabled:opacity-50
+      "
             >
-              <RiDeleteBin5Line size={15} />
+              {/* Glow */}
+              <div className="absolute inset-0 bg-gradient-to-br from-red-500/0 via-red-500/0 to-red-500/10 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+
+              <RiDeleteBin6Line
+                size={16}
+                className="relative z-10 text-muted-foreground transition-all duration-300 group-hover:scale-110 group-hover:text-red-500"
+              />
             </Button>
           </AlertDialogTrigger>
 
-          <AlertDialogContent className="rounded-3xl border border-border bg-card/95 backdrop-blur-md shadow-2xl p-6 max-w-sm">
-            <AlertDialogHeader className="space-y-2">
-              <AlertDialogTitle className="text-lg font-bold text-foreground">
-                Delete Scraper Workspace?
-              </AlertDialogTitle>
+          <AlertDialogContent
+            className="
+      max-w-md overflow-hidden rounded-[28px]
+      border border-border/70
+      bg-background/95
+      p-0 shadow-2xl backdrop-blur-2xl
+    "
+          >
+            {/* Top Gradient */}
+            <div className="h-1 w-full bg-gradient-to-r from-red-500/80 via-red-400/60 to-orange-400/70" />
 
-              <AlertDialogDescription className="text-xs text-muted-foreground leading-relaxed">
-                This action is irreversible.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
+            <div className="p-6">
 
-            <AlertDialogFooter className="mt-5 gap-2 sm:gap-0">
-              <AlertDialogCancel
-                disabled={deleting}
-                className="rounded-xl cursor-pointer text-xs font-semibold border border-border/85"
-              >
-                Cancel
-              </AlertDialogCancel>
+              {/* Icon */}
+              <div className="mb-5 flex items-center justify-center">
+                <div className="relative">
+                  <div className="absolute inset-0 rounded-full bg-red-500/20 blur-2xl" />
 
-              <AlertDialogAction
-                disabled={deleting}
-                onClick={(e) => {
-                  e.preventDefault();
-                  setDeleting(true);
+                  <div
+                    className="
+              relative flex h-16 w-16 items-center justify-center
+              rounded-3xl border border-red-500/20
+              bg-red-500/10
+            "
+                  >
+                    <RiDeleteBin6Line
+                      size={28}
+                      className="text-red-500"
+                    />
+                  </div>
+                </div>
+              </div>
 
-                  dispatch(deleteJob(job.id))
-                    .unwrap()
-                    .then(() => {
-                      toast.success("Scraper deleted successfully");
-                    })
-                    .catch((err) => {
-                      toast.error(err?.message || "Failed to delete workflow");
-                      setDeleting(false);
-                    });
-                }}
-                className="bg-red-600 text-white hover:bg-red-700 rounded-xl cursor-pointer text-xs font-semibold flex items-center justify-center min-w-20"
-              >
-                {deleting ? (
-                  <Loader size="xs" className="text-white" />
-                ) : (
-                  "Delete Job"
-                )}
-              </AlertDialogAction>
-            </AlertDialogFooter>
+              <AlertDialogHeader className="space-y-3 text-center">
+                <AlertDialogTitle className="text-xl font-bold tracking-tight text-foreground">
+                  Delete Scraper Job?
+                </AlertDialogTitle>
+
+                <AlertDialogDescription className="mx-auto max-w-xs text-sm leading-6 text-muted-foreground">
+                  This will permanently remove your scraper workflow,
+                  logs, and generated results.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+
+              {/* Info Box */}
+              <div className="mt-5 rounded-2xl border border-border/60 bg-muted/30 p-4">
+                <div className="flex items-start gap-3">
+                  <div className="mt-0.5 flex h-8 w-8 items-center justify-center rounded-xl bg-red-500/10">
+                    <RiAlarmWarningLine
+                      size={16}
+                      className="text-red-500"
+                    />
+                  </div>
+
+                  <div className="flex flex-col">
+                    <span className="text-sm font-semibold text-foreground">
+                      This action cannot be undone
+                    </span>
+
+                    <span className="mt-1 text-xs leading-5 text-muted-foreground">
+                      Once deleted, the scraper data will no longer be recoverable.
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Footer */}
+              <AlertDialogFooter className="mt-7 flex gap-3">
+                <AlertDialogCancel
+                  disabled={deleting}
+                  className="
+            h-11 flex-1 rounded-2xl border border-border/70
+            bg-background font-semibold transition-all duration-200
+            hover:bg-muted/50
+          "
+                >
+                  Cancel
+                </AlertDialogCancel>
+
+                <AlertDialogAction
+                  disabled={deleting}
+                  onClick={(e) => {
+                    e.preventDefault();
+
+                    setDeleting(true);
+
+                    dispatch(deleteJob(job.id))
+                      .unwrap()
+                      .then(() => {
+                        toast.success("Scraper deleted successfully");
+                      })
+                      .catch((err) => {
+                        toast.error(
+                          err?.message || "Failed to delete workflow"
+                        );
+
+                        setDeleting(false);
+                      });
+                  }}
+                  className="
+            h-11 min-w-[140px] rounded-2xl
+            bg-red-600 font-semibold text-white
+            transition-all duration-200
+            hover:bg-red-700 hover:shadow-lg hover:shadow-red-500/20
+            active:scale-[0.98]
+          "
+                >
+                  {deleting ? (
+                    <Loader size="xs" className="text-white" />
+                  ) : (
+                    <div className="flex items-center gap-2">
+                      <RiDeleteBin6Line size={15} />
+                      Delete Job
+                    </div>
+                  )}
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </div>
           </AlertDialogContent>
         </AlertDialog>
       </div>

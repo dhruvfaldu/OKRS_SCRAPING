@@ -134,13 +134,13 @@ export default function JobsPage() {
                         ))}
                     </div>
                 ) : count === 0 ? (
-                    <div className="max-w-xl mx-auto pt-6 animate-in zoom-in-95 duration-300">
-                        {/* <NoDataFound
+                    <div className="max-w-full mx-auto pt-6 animate-in zoom-in-95 duration-300">
+                        <NoDataFound
                             title="No Scraper Jobs Located"
                             description="It looks like you haven't defined any target websites or configuration selector codes yet."
-                            actionText="Setup First Workflow"
+                            actionText="Setup First Scraper Job Now 🚀"
                             actionUrl="/create"
-                        /> */}
+                        />
                     </div>
                 ) : (
                     <div className="space-y-8 animate-in fade-in duration-300">

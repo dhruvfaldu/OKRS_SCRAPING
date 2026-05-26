@@ -38,20 +38,20 @@ export const logout = createAsyncThunk("auth/logout", async (_, thunkAPI) => {
 }
 );
 
-// let storedUser = null;
-// try {
-//   const userStr = localStorage.getItem("user");
-//   if (userStr) {
-//     storedUser = JSON.parse(userStr);
-//   }
-// } catch (e) {
-//   console.error("Failed to parse user from localStorage", e);
-// }
+let storedUser = null;
+try {
+  const userStr = localStorage.getItem("user");
+  if (userStr) {
+    storedUser = JSON.parse(userStr);
+  }
+} catch (e) {
+  console.error("Failed to parse user from localStorage", e);
+}
 
 const authSlice = createSlice({
   name: "auth",
   initialState: {
-    user: null,
+    user: storedUser || null,
     token: localStorage.getItem("token") || null,
     loading: false,
     error: null,
@@ -88,13 +88,13 @@ const authSlice = createSlice({
         const token = action.payload?.token || action.payload?.data?.token;
         if (token) {
           state.token = token;
-          // const userObj = action.payload?.user || action.payload?.data?.user || null;
+          const userObj = action.payload?.user || action.payload?.data?.user || null;
           state.user = action.payload?.user || action.payload?.data?.user || null;
           state.isAuthenticated = true;
           localStorage.setItem("token", token);
-          // if (userObj) {
-          //   localStorage.setItem("user", JSON.stringify(userObj));
-          // }
+          if (userObj) {
+            localStorage.setItem("user", JSON.stringify(userObj));
+          }
         } else {
           state.error = "Token not received from API";
         }
@@ -116,12 +116,12 @@ const authSlice = createSlice({
         if (token) {
           state.token = token;
           state.isAuthenticated = true;
-          // const userObj = action.payload?.user || action.payload?.data?.user || null;
+          const userObj = action.payload?.user || action.payload?.data?.user || null;
           state.user = action.payload?.user || action.payload?.data?.user || null;
           localStorage.setItem("token", token);
-          // if (userObj) {
-          //   localStorage.setItem("user", JSON.stringify(userObj));
-          // }
+          if (userObj) {
+            localStorage.setItem("user", JSON.stringify(userObj));
+          }
         } else {
           state.error = "Token not received from API";
         }
@@ -171,7 +171,7 @@ const authSlice = createSlice({
         state.token = null;
         state.isAuthenticated = false;
         localStorage.removeItem("token");
-        // localStorage.removeItem("user");
+        localStorage.removeItem("user");
       });
   },
 });
