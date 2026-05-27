@@ -4,7 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { resetPassword } from "../api/authApi";
+import { resetPassword } from "../services/sacrperAuth";
 import logo from "../assets/Logoo.png";
 import { Lock, Eye, EyeOff, ShieldCheck } from "lucide-react";
 import { toast } from "react-toastify";
