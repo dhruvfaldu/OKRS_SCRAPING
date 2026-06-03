@@ -6,6 +6,7 @@ import { TooltipProvider } from './components/ui/tooltip'
 import './index.css'
 import App from './App.jsx'
 import { ThemeProvider } from './provider/theme-provider'
+import { Toaster } from "sonner";
 
 
 createRoot(document.getElementById('root')).render(
@@ -13,6 +14,7 @@ createRoot(document.getElementById('root')).render(
     <TooltipProvider>
       <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false} disableTransitionOnChange>
         <App />
+        <Toaster richColors position="top-right" />
       </ThemeProvider>
     </TooltipProvider>
   </Provider>

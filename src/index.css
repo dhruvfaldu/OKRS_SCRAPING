@@ -112,7 +112,7 @@
 
 @theme inline {
   --color-background: var(--background);
-  --color-foreground: var(--foreground);    
+  --color-foreground: var(--foreground);
   --color-card: var(--card);
   --color-card-foreground: var(--card-foreground);
   --color-popover: var(--popover);
@@ -167,11 +167,28 @@
   * {
     @apply border-border outline-ring/50;
   }
+
   body {
     @apply bg-background text-foreground;
   }
+
   button:not(:disabled) {
     @apply cursor-pointer;
   }
 }
 
+@keyframes shimmer {
+  100% {
+    left: 140%;
+  }
+}
+
+@keyframes loading {
+  0% {
+    transform: translateX(-100%);
+  }
+
+  100% {
+    transform: translateX(220%);
+  }
+}

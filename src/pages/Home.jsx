@@ -2,9 +2,23 @@ import { useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { fetchJobs } from "../store/slices/jobSlice";
-import { Plus, BriefcaseBusiness, Activity, Clock3, Play, BarChart, ArrowRight, Zap, History } from "lucide-react";
+import { Plus, BriefcaseBusiness, Activity, Clock3, Play, BarChart, ArrowRight, Zap, History, Sparkles } from "lucide-react";
 import { useState } from "react";
 import useLocalStorage from "../hooks/useLocalStorage";
+import { toast } from "sonner";
+import Loader from "../components/loaders/Loader.jsx";
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+} from "@/components/ui/table";
+
+import { Badge } from "@/components/ui/badge";
+
+import { Button } from "@/components/ui/button";
 
 function Home() {
     const dispatch = useDispatch();
@@ -55,58 +69,88 @@ function Home() {
         }
     };
 
+    const getGreeting = () => {
+        const hour = new Date().getHours();
+        if (hour < 12) return "Good Morning";
+        if (hour < 18) return "Good Afternoon";
+        return "Good evening";
+    };
+
     return (
         <div className="bg-background text-foreground min-h-screen p-5 sm:p-8">
             <div className="max-w-6xl mx-auto space-y-8">
 
-                {/* 1. Header */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-card/40 border border-border rounded-2xl p-6 shadow-sm backdrop-blur-md">
-                    <div>
-                        <h1 className="text-3xl font-bold tracking-tight">
-                            👋 Welcome back, <span className="text-primary">{user?.name || "Dhruv"}</span>
+                {/* 1. Header Welcome Banner */}
+                <div className="relative overflow-hidden rounded-3xl border border-border/80 bg-card p-6 sm:p-8 shadow-xl flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+                    {/* Decorative blurred backgrounds */}
+                    <div className="absolute top-0 right-0 w-80 h-80 bg-primary/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3 pointer-events-none" />
+                    <div className="absolute bottom-0 left-0 w-80 h-80 bg-indigo-500/5 rounded-full blur-3xl translate-y-1/3 -translate-x-1/3 pointer-events-none" />
+
+                    <div className="relative z-10 space-y-2">
+                        <div className="inline-flex items-center gap-1.5 bg-primary/10 border border-primary/20 text-primary px-3 py-1 rounded-full text-xs font-semibold select-none">
+                            <Sparkles className="w-3.5 h-3.5 animate-pulse" />
+                            <span>Professional Workspace Enabled</span>
+                        </div>
+                        <h1 className="text-3xl font-extrabold tracking-tight sm:text-4xl text-foreground">
+                            {getGreeting()}, <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary to-indigo-600">{user?.name || "Dhruv"}</span>
                         </h1>
-                        <p className="text-muted-foreground mt-2 text-sm">
-                            Here's what's happening with your scraping jobs today.
+                        <p className="text-sm text-muted-foreground max-w-xl leading-relaxed">
+                            Monitor scraper metrics, schedule crawling configurations, and export real-time selector tables from one central dashboard.
                         </p>
                     </div>
-                    <Link
-                        to="/create"
-                        className="inline-flex items-center gap-2 bg-primary text-primary-foreground hover:bg-primary/90 px-5 py-2.5 rounded-xl text-sm font-medium transition-all shadow-sm hover:shadow-md shrink-0"
-                    >
-                        <Plus size={18} />
-                        Create Job
-                    </Link>
+
+                    <div className="relative z-10 shrink-0 flex items-center gap-3">
+                        <Link
+                            to="/create"
+                            className="inline-flex items-center gap-2 bg-primary text-primary-foreground hover:bg-primary/95 px-5 py-3 rounded-2xl text-sm font-semibold shadow-md shadow-primary/15 hover:scale-102 hover:shadow-lg transition-all duration-200"
+                        >
+                            <Plus size={16} />
+                            Create Scraper Job
+                        </Link>
+                    </div>
                 </div>
 
                 {/* 2. Stats */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div className="rounded-2xl border border-border bg-card p-5 shadow-sm hover:border-primary/30 transition-all flex items-center gap-4">
-                        <div className="w-12 h-12 rounded-full bg-primary/10 text-primary flex items-center justify-center shrink-0">
-                            <BriefcaseBusiness size={24} />
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                    {/* Stat Card 1 */}
+                    <div className="rounded-3xl border border-border/80 bg-card p-6 shadow-sm hover:shadow-md hover:border-primary/40 transition-all duration-300 flex items-center justify-between relative overflow-hidden group">
+                        <div className="space-y-2 relative z-10">
+                            <p className="text-xs font-semibold tracking-wider text-muted-foreground uppercase">Total Workspaces</p>
+                            <div className="flex items-baseline gap-2">
+                                <h3 className="text-3xl font-bold tracking-tight text-foreground">{isLoading ? <Loader size="sm" /> : count}</h3>
+                                <span className="text-[10px] text-emerald-500 bg-emerald-500/10 px-1.5 py-0.5 rounded font-medium">+10%</span>
+                            </div>
                         </div>
-                        <div>
-                            <p className="text-sm font-medium text-muted-foreground">Total Jobs</p>
-                            <h3 className="text-2xl font-bold">{count}</h3>
-                        </div>
-                    </div>
-
-                    <div className="rounded-2xl border border-border bg-card p-5 shadow-sm hover:border-emerald-500/30 transition-all flex items-center gap-4">
-                        <div className="w-12 h-12 rounded-full bg-emerald-500/10 text-emerald-500 flex items-center justify-center shrink-0">
-                            <Activity size={24} />
-                        </div>
-                        <div>
-                            <p className="text-sm font-medium text-muted-foreground">Completed Runs</p>
-                            <h3 className="text-2xl font-bold">{completedCount}</h3>
+                        <div className="w-12 h-12 rounded-2xl bg-primary/10 border border-primary/20 text-primary flex items-center justify-center shrink-0 relative z-10 group-hover:scale-110 transition-transform duration-300">
+                            <BriefcaseBusiness size={20} />
                         </div>
                     </div>
 
-                    <div className="rounded-2xl border border-border bg-card p-5 shadow-sm hover:border-amber-500/30 transition-all flex items-center gap-4">
-                        <div className="w-12 h-12 rounded-full bg-amber-500/10 text-amber-500 flex items-center justify-center shrink-0">
-                            <Clock3 size={24} />
+                    {/* Stat Card 2 */}
+                    <div className="rounded-3xl border border-border/80 bg-card p-6 shadow-sm hover:shadow-md hover:border-emerald-500/40 transition-all duration-300 flex items-center justify-between relative overflow-hidden group">
+                        <div className="space-y-2 relative z-10">
+                            <p className="text-xs font-semibold tracking-wider text-muted-foreground uppercase">Successful Runs</p>
+                            <div className="flex items-baseline gap-2">
+                                <h3 className="text-3xl font-bold tracking-tight text-foreground">{isLoading ? <Loader size="sm" /> : completedCount}</h3>
+                                <span className="text-[10px] text-emerald-500 bg-emerald-500/10 px-1.5 py-0.5 rounded font-medium">98.2% Success</span>
+                            </div>
                         </div>
-                        <div>
-                            <p className="text-sm font-medium text-muted-foreground">In Queue</p>
-                            <h3 className="text-2xl font-bold">{pendingCount}</h3>
+                        <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 flex items-center justify-center shrink-0 relative z-10 group-hover:scale-110 transition-transform duration-300">
+                            <Activity size={20} />
+                        </div>
+                    </div>
+
+                    {/* Stat Card 3 */}
+                    <div className="rounded-3xl border border-border/80 bg-card p-6 shadow-sm hover:shadow-md hover:border-amber-500/40 transition-all duration-300 flex items-center justify-between relative overflow-hidden group sm:col-span-2 lg:col-span-1">
+                        <div className="space-y-2 relative z-10">
+                            <p className="text-xs font-semibold tracking-wider text-muted-foreground uppercase">Pending In Queue</p>
+                            <div className="flex items-baseline gap-2">
+                                <h3 className="text-3xl font-bold tracking-tight text-foreground">{isLoading ? <Loader size="sm" /> : pendingCount}</h3>
+                                <span className="text-[10px] text-amber-500 bg-amber-500/10 px-1.5 py-0.5 rounded font-medium">Next run in 2m</span>
+                            </div>
+                        </div>
+                        <div className="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-500 flex items-center justify-center shrink-0 relative z-10 group-hover:scale-110 transition-transform duration-300">
+                            <Clock3 size={20} />
                         </div>
                     </div>
                 </div>
@@ -142,22 +186,79 @@ function Home() {
                             {recentJobs.length > 0 ? (
                                 <ul className="divide-y divide-border">
                                     {recentJobs.map((job, idx) => (
-                                        <li key={idx} className="p-4 hover:bg-accent/30 transition-colors flex items-start gap-4 rounded-xl">
-                                            <div className="w-2.5 h-2.5 mt-1.5 rounded-full bg-primary shrink-0"></div>
-                                            <div>
-                                                <p className="text-sm font-medium text-foreground">
-                                                    {/* TODO: When backend is available, uncomment below and remove the jobStatusMap logic */}
-                                                    {/* Job <span className="font-bold text-primary">{job.name}</span> was {job.status === 'completed' ? 'completed successfully' : 'created'} */}
-                                                    Job <span className="font-bold text-primary">{job.name}</span> was {(jobStatusMap[job.id] || job.status || "pending").toLowerCase() === 'completed' ? 'completed successfully' : 'created'}
-                                                </p>
-                                                <p className="text-xs text-muted-foreground mt-1">Recently</p>
+                                        <li
+                                            key={idx}
+                                            className="group relative overflow-hidden rounded-2xl border border-transparent bg-background/40 mb-2 p-4 transition-all duration-300 hover:border-border hover:bg-accent/20 hover:shadow-sm"
+                                        >
+                                            <div className="flex items-start gap-4">
+
+                                                {/* Status Indicator */}
+                                                <div className="relative mt-1 flex shrink-0">
+                                                    <span className="absolute inline-flex h-2.5 w-2.5 animate-pulse rounded-full bg-primary/40" />
+
+                                                    <span
+                                                        className={`relative h-2.5 w-2.5 rounded-full ${(jobStatusMap[job.id] || job.status || "pending").toLowerCase() ===
+                                                            "completed"
+                                                            ? "bg-emerald-500"
+                                                            : "bg-primary"
+                                                            }`}
+                                                    />
+                                                </div>
+
+                                                {/* Content */}
+                                                <div className="flex-1 space-y-2">
+                                                    <p className="text-sm leading-6 text-foreground">
+                                                        Job{" "}
+                                                        <span className="font-semibold text-primary">
+                                                            {job.name}
+                                                        </span>{" "}
+                                                        was{" "}
+                                                        <span
+                                                            className={`font-medium ${(jobStatusMap[job.id] || job.status || "pending").toLowerCase() ===
+                                                                "completed"
+                                                                ? "text-emerald-500"
+                                                                : "text-muted-foreground"
+                                                                }`}
+                                                        >
+                                                            {(jobStatusMap[job.id] || job.status || "pending").toLowerCase() ===
+                                                                "completed"
+                                                                ? "completed successfully"
+                                                                : "created"}
+                                                        </span>
+                                                    </p>
+
+                                                    {/* Footer */}
+                                                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                                        <span className="h-2 w-2 rounded-full bg-muted-foreground/40" />
+
+                                                        <span>
+                                                            {new Date(job.createdAt || Date.now()).toLocaleDateString()}
+                                                        </span>
+
+                                                        <span className="h-2 w-2 rounded-full bg-muted-foreground/40" />
+
+                                                        <span className="rounded-full bg-muted px-2 py-1 text-[10px] font-medium uppercase tracking-wide">
+                                                            Activity Log
+                                                        </span>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </li>
                                     ))}
                                 </ul>
                             ) : (
-                                <div className="p-8 text-center text-muted-foreground text-sm">
-                                    No recent activity found.
+                                <div className="flex flex-col items-center justify-center py-14 text-center">
+                                    <div className="mb-4 rounded-full bg-muted p-4">
+                                        <Clock3 className="h-6 w-6 text-muted-foreground" />
+                                    </div>
+
+                                    <h3 className="text-lg font-semibold text-foreground">
+                                        No Recent Activity
+                                    </h3>
+
+                                    <p className="mt-2 max-w-sm text-sm text-muted-foreground">
+                                        Your recent scraper activity will appear here once you start using the platform.
+                                    </p>
                                 </div>
                             )}
                         </div>
@@ -175,7 +276,19 @@ function Home() {
                         </div>
                         <div className="bg-card border border-border rounded-2xl flex-1 overflow-hidden shadow-sm">
                             {isLoading ? (
-                                <div className="p-8 text-center text-muted-foreground text-sm">Loading jobs...</div>
+                                <div className="flex h-[320px] flex-col items-center justify-center gap-4">
+                                    <Loader size="lg" />
+
+                                    <div className="space-y-1 text-center">
+                                        <h3 className="text-sm font-medium text-foreground">
+                                            Loading Jobs
+                                        </h3>
+
+                                        <p className="text-sm text-muted-foreground">
+                                            Fetching your latest scraping jobs...
+                                        </p>
+                                    </div>
+                                </div>
                             ) : recentJobs.length > 0 ? (
                                 <div className="overflow-x-auto">
                                     <table className="w-full text-sm text-left">
@@ -200,8 +313,9 @@ function Home() {
                                                             {job.status || "pending"}
                                                         </span> */}
                                                         <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold border ${(jobStatusMap[job.id] || job.status || "pending").toLowerCase() === "completed" ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/30" :
-                                                            (jobStatusMap[job.id] || job.status || "pending").toLowerCase() === "running" ? "bg-blue-500/10 text-blue-600 border-blue-500/30" :
-                                                                "bg-amber-500/10 text-amber-600 border-amber-500/30"
+                                                            (jobStatusMap[job.id] || job.status || "pending").toLowerCase() === "running" ? "bg-blue-500/10 text-blue-600 border-blue-500/30" : (
+                                                                (jobStatusMap[job.id] || job.status || "pending").toLowerCase() === "failed" ? "bg-red-500/10 text-red-700 border-red-500/30" : "bg-amber-500/10 text-amber-600 border-amber-500/30")
+
                                                             }`}>
                                                             {jobStatusMap[job.id] || job.status || "pending"}
                                                         </span>
@@ -220,9 +334,23 @@ function Home() {
                                     </table>
                                 </div>
                             ) : (
-                                <div className="p-8 text-center flex flex-col items-center justify-center h-full text-muted-foreground">
-                                    <p className="text-sm mb-4">No jobs created yet.</p>
-                                    <Link to="/create" className="text-sm bg-primary text-primary-foreground px-4 py-2 rounded-lg font-medium hover:bg-primary/90">
+                                <div className="flex h-full flex-col items-center justify-center px-6 py-14 text-center">
+                                    <div className="mb-4 rounded-2xl bg-muted p-4">
+                                        <BriefcaseBusiness className="h-7 w-7 text-muted-foreground" />
+                                    </div>
+
+                                    <h3 className="text-xl font-semibold text-foreground">
+                                        No Jobs Created
+                                    </h3>
+
+                                    <p className="mt-2 max-w-sm text-sm leading-6 text-muted-foreground">
+                                        Start by creating your first scraping job to track, manage, and monitor scraper activity from one place.
+                                    </p>
+
+                                    <Link
+                                        to="/create"
+                                        className="mt-6 inline-flex items-center rounded-xl bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+                                    >
                                         Create First Job
                                     </Link>
                                 </div>

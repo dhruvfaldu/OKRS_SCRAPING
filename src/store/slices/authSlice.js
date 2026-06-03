@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { registerUser, loginUser, logoutUser } from "../../api/authApi";
+import { registerUser, loginUser, logoutUser } from "../../services/sacrperAuth";
 
 export const register = createAsyncThunk("auth/register", async (userData, thunkAPI) => {
   try {
@@ -51,7 +51,7 @@ try {
 const authSlice = createSlice({
   name: "auth",
   initialState: {
-    user: storedUser,
+    user: storedUser || null,
     token: localStorage.getItem("token") || null,
     loading: false,
     error: null,
@@ -89,7 +89,7 @@ const authSlice = createSlice({
         if (token) {
           state.token = token;
           const userObj = action.payload?.user || action.payload?.data?.user || null;
-          state.user = userObj;
+          state.user = action.payload?.user || action.payload?.data?.user || null;
           state.isAuthenticated = true;
           localStorage.setItem("token", token);
           if (userObj) {
@@ -117,7 +117,7 @@ const authSlice = createSlice({
           state.token = token;
           state.isAuthenticated = true;
           const userObj = action.payload?.user || action.payload?.data?.user || null;
-          state.user = userObj;
+          state.user = action.payload?.user || action.payload?.data?.user || null;
           localStorage.setItem("token", token);
           if (userObj) {
             localStorage.setItem("user", JSON.stringify(userObj));
@@ -160,7 +160,7 @@ const authSlice = createSlice({
         state.token = null;
         state.isAuthenticated = false;
         localStorage.removeItem("token");
-        localStorage.removeItem("user");
+        // localStorage.removeItem("user");
         console.log("User logged out successfully");
       })
       .addCase(logout.rejected, (state, action) => {

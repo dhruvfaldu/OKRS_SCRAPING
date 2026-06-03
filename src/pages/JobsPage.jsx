@@ -1,14 +1,18 @@
-import JobCardSkeleton from "../components/loaders/JobCardSkeleton";
-import Pagination from "../components/common/Pagination";
-import { Plus, BriefcaseBusiness, Activity, Clock3, RotateCw } from "lucide-react";
-import { useEffect, useState } from "react";
+import React, { useEffect } from "react";
+import { Plus, BriefcaseBusiness, Activity, Clock3, RotateCw, Sparkles } from "lucide-react";
 import { useSelector, useDispatch } from "react-redux";
 import { fetchJobs } from "../store/slices/jobSlice";
 import JobCard from "../components/common/JobCard";
+import JobCardSkeleton from "../components/loaders/JobCardSkeleton";
+import NoDataFound from "../components/error/NoDataFound";
+import TableError from "../components/error/TableError";
+import Pagination from "../components/common/Pagination";
 import { Link, useSearchParams } from "react-router-dom";
-import useLocalStorage from "../hooks/useLocalStorage";
 
-function JobsPage() {
+/**
+ * JobsPage - Upgraded high-fidelity Jobs dashboard list
+ */
+export default function JobsPage() {
     const [searchParams, setSearchParams] = useSearchParams();
     const pageParam = parseInt(searchParams.get("page"), 10);
     const page = isNaN(pageParam) || pageParam < 1 ? 1 : pageParam;
@@ -18,7 +22,7 @@ function JobsPage() {
     };
 
     const dispatch = useDispatch();
-    const { items: jobs = [], isLoading, isFetching } = useSelector((state) => state.jobs);
+    const { items: jobs = [], isLoading, isFetching, error } = useSelector((state) => state.jobs);
 
     useEffect(() => {
         dispatch(fetchJobs());
@@ -26,13 +30,10 @@ function JobsPage() {
 
     // Stats
     const count = jobs.length;
-
-    // TODO: When backend is available, remove useLocalStorage and uncomment the below code
     const completed = jobs.filter((j) => j?.status === "completed").length;
-
     const pending = count - completed;
 
-    // Pagination
+    // Pagination configuration
     const perPage = 9;
     const startIndex = (page - 1) * perPage;
     const paginatedJobs = jobs.slice(startIndex, startIndex + perPage);
@@ -40,119 +41,132 @@ function JobsPage() {
     const hasNextPage = page < maxPages;
 
     return (
-        <div className="p-5 space-y-6">
+        <div className="bg-background text-foreground min-h-screen p-6 sm:p-8 space-y-8 animate-in fade-in duration-300">
+            <div className="max-w-7xl mx-auto space-y-8">
 
-            {/* Header */}
-            <div className="flex items-center justify-between flex-wrap gap-3">
-                <div className="flex items-center gap-3">
-                    <div className="p-2 rounded-xl bg-primary/10">
-                        <BriefcaseBusiness className="w-7 h-7 text-primary" />
+                {/* 1. Header Banner */}
+                <div className="relative overflow-hidden rounded-3xl border border-border/80 bg-card p-6 sm:p-7 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    {/* Glow background */}
+                    <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/4 pointer-events-none" />
+
+                    <div className="flex items-center gap-4 relative z-10">
+                        <div className="p-3 rounded-2xl bg-primary/10 border border-primary/15 text-primary shrink-0">
+                            <BriefcaseBusiness className="w-6 h-6" />
+                        </div>
+                        <div>
+                            <h1 className="text-2xl font-extrabold tracking-tight text-foreground">Scraper Jobs</h1>
+                            <p className="text-xs text-muted-foreground mt-0.5">
+                                Monitor progress, schedule scraping runs, and view selector tables.
+                            </p>
+                        </div>
                     </div>
 
-                    <div>
-                        <h1 className="text-2xl font-semibold leading-tight">Jobs</h1>
-                        <p className="text-sm text-muted-foreground">
-                            Manage and monitor your scraping jobs
-                        </p>
+                    <div className="flex items-center gap-3 relative z-10 shrink-0">
+                        <button
+                            onClick={() => dispatch(fetchJobs())}
+                            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-border/80 bg-background/50 hover:bg-muted text-xs font-semibold text-muted-foreground hover:text-foreground transition cursor-pointer"
+                        >
+                            <RotateCw
+                                size={14}
+                                className={`transition-transform duration-300 hover:rotate-180 ${isFetching ? "animate-spin" : ""}`}
+                            />
+                            Refresh Workspaces
+                        </button>
+
+                        <Link
+                            to="/create"
+                            className="inline-flex items-center gap-1.5 bg-primary text-primary-foreground hover:bg-primary/95 px-4 py-2.5 rounded-xl text-xs font-bold shadow-md shadow-primary/10 hover:scale-102 transition"
+                        >
+                            <Plus size={14} />
+                            Create Scraper
+                        </Link>
                     </div>
                 </div>
 
-                <div className="flex items-center gap-3">
-                    <button
-                        onClick={() => dispatch(fetchJobs())}
-                        className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition"
-                    >
-                        <RotateCw
-                            size={16}
-                            className={isFetching ? "animate-spin" : ""}
+                {/* 2. Stats Dashboard Overview */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+                    {/* Metric Card 1 */}
+                    <div className="rounded-2xl border border-border/85 bg-card p-5 shadow-2xs hover:border-primary/30 transition-all flex items-center gap-4 relative group">
+                        <div className="w-10 h-10 rounded-xl bg-primary/10 border border-primary/15 text-primary flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                            <BriefcaseBusiness size={18} />
+                        </div>
+                        <div className="space-y-0.5">
+                            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Total Scrapers</p>
+                            <p className="text-xl font-bold text-foreground leading-none">{isLoading ? "..." : count}</p>
+                        </div>
+                    </div>
+
+                    {/* Metric Card 2 */}
+                    <div className="rounded-2xl border border-border/85 bg-card p-5 shadow-2xs hover:border-emerald-500/30 transition-all flex items-center gap-4 relative group">
+                        <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/15 text-emerald-500 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                            <Activity size={18} />
+                        </div>
+                        <div className="space-y-0.5">
+                            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Active Completed</p>
+                            <p className="text-xl font-bold text-foreground leading-none">{isLoading ? "..." : completed}</p>
+                        </div>
+                    </div>
+
+                    {/* Metric Card 3 */}
+                    <div className="rounded-2xl border border-border/85 bg-card p-5 shadow-2xs hover:border-amber-500/30 transition-all flex items-center gap-4 relative group">
+                        <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/15 text-amber-500 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                            <Clock3 size={18} />
+                        </div>
+                        <div className="space-y-0.5">
+                            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Deployments Queue</p>
+                            <p className="text-xl font-bold text-foreground leading-none">{isLoading ? "..." : pending}</p>
+                        </div>
+                    </div>
+                </div>
+
+                {/* 3. Main Data Content Grid */}
+                {error ? (
+                    <div className="max-w-xl mx-auto pt-6 animate-in zoom-in-95 duration-300">
+                        <TableError
+                            message={error}
+                            onRetry={() => dispatch(fetchJobs())}
                         />
-                        Refresh
-                    </button>
-
-                    <Link
-                        to="/create"
-                        className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-4 py-2 rounded-xl text-sm font-medium hover:bg-primary/90"
-                    >
-                        <Plus size={16} />
-                        New Job
-                    </Link>
-                </div>
-            </div>
-
-            {/* Stats Cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6">
-                <div className="rounded-xl border border-border bg-card p-4">
-                    <p className="text-xs uppercase tracking-wide text-muted-foreground mb-2">Total Jobs</p>
-                    <div className="flex gap-2">
-                        <div className="w-9 h-9 rounded-full bg-primary/10 flex justify-center items-center">
-                            <BriefcaseBusiness size={18} className="text-primary" />
-                        </div>
-                        <span className="mt-1 text-xl font-semibold">{count}</span>
                     </div>
-                </div>
-                <div className="rounded-xl border border-border bg-card p-4">
-                    <p className="text-xs uppercase tracking-wide text-muted-foreground mb-2">Completed Jobs</p>
-                    <div className="flex gap-2">
-                        <div className="w-9 h-9 rounded-full bg-emerald-500/10 text-emerald-500 flex justify-center items-center">
-                            <Activity size={18} className="text-emerald-500" />
-                        </div>
-                        <span className="mt-1 text-xl font-semibold">{completed}</span>
-                    </div>
-                </div>
-                <div className="rounded-xl border border-border bg-card p-4">
-                    <p className="text-xs uppercase tracking-wide text-muted-foreground mb-2">Total Jobs</p>
-                    <div className="flex gap-2">
-                        <div className="w-9 h-9 rounded-full bg-amber-500/10 flex justify-center items-center">
-                            <BriefcaseBusiness size={18} className="text-amber-500" />
-                        </div>
-                        <span className="mt-1 text-xl font-semibold">{pending}</span>
-                    </div>
-                </div>
-            </div>
-
-            {/* Content */}
-            {isLoading ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
-                    {Array.from({ length: 6 }).map((_, i) => (
-                        <JobCardSkeleton key={i} />
-                    ))}
-                </div>
-            ) : count === 0 ? (
-                <div className="rounded-2xl border border-dashed border-border bg-card p-10 text-center">
-                    <h2 className="text-lg font-semibold mb-2">No jobs created yet</h2>
-                    <p className="text-sm text-muted-foreground mb-5">
-                        Start by creating your first scraping workflow.
-                    </p>
-                    <Link
-                        to="/create"
-                        className="inline-flex items-center gap-2 bg-primary text-primary-foreground hover:bg-primary/90 px-4 py-2 rounded-xl text-sm font-medium"
-                    >
-                        <Plus size={16} />
-                        Create First Job
-                    </Link>
-                </div>
-            ) : (
-                <>
-                    {/* Job Grid */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
-                        {paginatedJobs.map((job) => (
-                            <JobCard key={job.id} job={job} />
+                ) : isLoading ? (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6 animate-in fade-in duration-300">
+                        {Array.from({ length: 6 }).map((_, i) => (
+                            <JobCardSkeleton key={i} />
                         ))}
                     </div>
-
-                    {/* Pagination */}
-                    {maxPages > 1 && (
-                        <Pagination
-                            page={page}
-                            setPage={setPage}
-                            hasNextPage={hasNextPage}
-                            maxpages={maxPages}
+                ) : count === 0 ? (
+                    <div className="max-w-full mx-auto pt-6 animate-in zoom-in-95 duration-300">
+                        <NoDataFound
+                            title="No Scraper Jobs Located"
+                            description="It looks like you haven't defined any target websites or configuration selector codes yet."
+                            actionText="Setup First Scraper Job Now 🚀"
+                            actionUrl="/create"
                         />
-                    )}
-                </>
-            )}
+                    </div>
+                ) : (
+                    <div className="space-y-8 animate-in fade-in duration-300">
+
+                        {/* The Job Grid */}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
+                            {paginatedJobs.map((job) => (
+                                <JobCard key={job.id} job={job} />
+                            ))}
+                        </div>
+
+                        {/* Interactive Pagination controls */}
+                        {maxPages > 1 && (
+                            <div className="flex justify-center pt-2">
+                                <Pagination
+                                    page={page}
+                                    setPage={setPage}
+                                    hasNextPage={hasNextPage}
+                                    maxpages={maxPages}
+                                />
+                            </div>
+                        )}
+
+                    </div>
+                )}
+            </div>
         </div>
     );
 }
-
-export default JobsPage;

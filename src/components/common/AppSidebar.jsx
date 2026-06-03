@@ -1,71 +1,134 @@
-import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarMenu, SidebarMenuItem, SidebarMenuButton, } from "@/components/ui/sidebar";
+import {
+    Sidebar,
+    SidebarContent,
+    SidebarFooter,
+    SidebarGroup,
+    SidebarMenu,
+    SidebarMenuButton,
+    SidebarMenuItem,
+} from "@/components/ui/sidebar";
+
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Home, Plus, BarChart, LogOut } from "lucide-react";
+
+import { Home, Plus, BarChart, LogOut, Sparkles } from "lucide-react";
+
 import { useSidebar } from "../ui/sidebar";
+
 import { useSelector, useDispatch } from "react-redux";
+
 import { logout } from "../../store/slices/authSlice";
+
 import logo from "../../assets/Logoo.png";
 
 export default function AppSidebar() {
     const location = useLocation();
     const navigate = useNavigate();
-    const { state, setOpenMobile, isMobile } = useSidebar();
-    const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
+
     const dispatch = useDispatch();
+
+    const { state, setOpenMobile, isMobile } = useSidebar();
+
+    const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
+
     const isCollapsed = state === "collapsed";
+
+    const menuItems = [
+        { title: "Dashboard", url: "/", icon: Home },
+        { title: "Create Job", url: "/create", icon: Plus },
+        { title: "Jobs", url: "/jobs", icon: BarChart },
+    ];
 
     const handleLogout = async () => {
         try {
-            // Wait until API call and Redux state update complete
             await dispatch(logout()).unwrap();
 
-            // Close mobile sidebar if open
-            if (isMobile) {
-                setOpenMobile(false);
-            }
+            if (isMobile) setOpenMobile(false);
 
-            // Redirect after successful logout
             navigate("/login", { replace: true });
         } catch (error) {
             console.error("Logout failed:", error);
         }
     };
 
-    const menuItems = [
-        { title: "Home", url: "/", icon: Home },
-        { title: "Create Job", url: "/create", icon: Plus },
-        { title: "Jobs", url: "/jobs", icon: BarChart },
-    ];
-
     return (
-        <Sidebar collapsible="icon" className="bg-sidebar text-sidebar-foreground border-r border-sidebar-border min-h-screen">
-            <SidebarContent >
-                {/* HEADER */}
-                <div className="p-4">
-                    {!isCollapsed && (
-                        <div className="flex items-center justify-between mt-2 mb-4">
-                            <Link to="/" className="flex items-center gap-2 min-w-0">
-                                {/* <div className="w-9 h-9 bg-sidebar-primary text-sidebar-primary-foreground flex items-center justify-center rounded-lg shrink-0">
-                                    🕷
-                                </div> */}
-                                <img src={logo} alt="logo" className="w-11 h-11 object-contain" />
-                                <div className="flex flex-col min-w-0">
-                                    <span className="font-bold text-sidebar-foreground text-xl truncate">Universal</span>
-                                    <span className="text-xs text-sidebar-foreground/70 truncate">Web Scraper</span>
-                                </div>
-                            </Link>
+        <Sidebar
+            collapsible="icon"
+            className="border-r border-sidebar-border/60 bg-sidebar backdrop-blur-xl"
+        >
+            <SidebarContent className="flex flex-col">
+
+                {/* Header */}
+                <div className={`border-b border-sidebar-border/60 ${isCollapsed ? "px-2 py-5" : "px-4 py-5"}`}>
+                    <Link
+                        to="/"
+                        className={`group flex items-center ${isCollapsed ? "justify-center" : "gap-3"}`}
+                    >
+                        <div className="relative shrink-0">
+                            <div className="absolute inset-0 rounded-2xl bg-primary/20 blur-lg opacity-70 transition-opacity duration-300 group-hover:opacity-100" />
+
+                            <div
+                                className={`relative flex items-center justify-center rounded-2xl transition-all duration-300 ${isCollapsed ? "h-11 w-11" : "h-12 w-12"}`}
+                            >
+                                <img
+                                    src={logo}
+                                    alt="logo"
+                                    className={`object-contain transition-all duration-300 ${isCollapsed ? "h-10 w-10" : "h-10 w-10"}`}
+                                />
+                            </div>
                         </div>
-                    )}
+
+                        {!isCollapsed && (
+                            <div className="flex min-w-0 flex-col">
+                                <span className="truncate text-base font-bold tracking-tight text-sidebar-foreground">
+                                    Universal
+                                </span>
+
+                                <span className="truncate text-xs text-sidebar-foreground/60">
+                                    Web Scraper Platform
+                                </span>
+                            </div>
+                        )}
+                    </Link>
                 </div>
-                {/*MENU */}
-                <SidebarGroup>
-                    <SidebarMenu>
+
+                {/* Workspace */}
+                {!isCollapsed && (
+                    <div className="mx-3 mt-4 rounded-2xl border border-sidebar-border/60 bg-sidebar-accent/20 p-4">
+                        <div className="flex items-start gap-3">
+                            <div className="mt-0.5 rounded-lg bg-primary/10 p-2">
+                                <Sparkles className="h-4 w-4 text-primary" />
+                            </div>
+
+                            <div className="flex flex-col">
+                                <span className="text-sm font-semibold text-sidebar-foreground">
+                                    Workspace Active
+                                </span>
+
+                                <span className="mt-1 text-xs leading-5 text-sidebar-foreground/60">
+                                    All scraping systems are running smoothly.
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* Navigation */}
+                <SidebarGroup className="mt-5 px-3">
+                    {!isCollapsed && (
+                        <p className="mb-3 px-3 text-[11px] font-semibold uppercase tracking-[0.2em] text-sidebar-foreground/40">
+                            Navigation
+                        </p>
+                    )}
+
+                    <SidebarMenu className="space-y-2">
                         {menuItems.map((item) => {
-                            const isJobsItem = item.url === "/jobs";
-                            const isActive = isJobsItem
-                                ? location.pathname.startsWith("/jobs") || location.pathname.startsWith("/results")
-                                : location.pathname === item.url;
                             const Icon = item.icon;
+
+                            const isActive =
+                                item.url === "/jobs"
+                                    ? location.pathname.startsWith("/jobs") ||
+                                    location.pathname.startsWith("/results")
+                                    : location.pathname === item.url;
 
                             return (
                                 <SidebarMenuItem key={item.title}>
@@ -73,21 +136,22 @@ export default function AppSidebar() {
                                         asChild
                                         isActive={isActive}
                                         tooltip={item.title}
-                                        className="transition-all text-sidebar-foreground hover:bg-sidebar-accent/60 hover:text-sidebar-accent-foreground data-[active=true]:bg-sidebar-primary data-[active=true]:text-sidebar-primary-foreground data-[active=true]:hover:bg-sidebar-primary/90 data-[state=collapsed]:justify-center"
+                                        className={`group h-12 rounded-2xl border border-transparent transition-all duration-200 hover:bg-sidebar-accent/40 hover:text-sidebar-accent-foreground data-[active=true]:border-primary/10 data-[active=true]:bg-primary data-[active=true]:text-primary-foreground data-[active=true]:shadow-lg data-[active=true]:shadow-primary/10 ${isCollapsed ? "justify-center px-0" : "px-3"}`}
                                     >
                                         <Link
                                             to={item.url}
-                                            className="flex items-center gap-3 px-3 py-2 rounded-md mb-2"
-                                            onClick={() => {
-                                                if (isMobile) {
-                                                    setOpenMobile(false);
-                                                }
-                                            }}
+                                            className={`flex items-center ${isCollapsed ? "justify-center" : "gap-3"}`}
+                                            onClick={() => isMobile && setOpenMobile(false)}
                                         >
-                                            <Icon size={18} />
-                                            <span className="data-[state=collapsed]:hidden">
-                                                {item.title}
-                                            </span>
+                                            <div className={`flex items-center justify-center rounded-xl transition-colors ${isCollapsed ? "h-10 w-10" : "h-8 w-8"} ${isActive ? "bg-white/10" : "bg-sidebar-accent/30 group-hover:bg-sidebar-accent/50"}`}>
+                                                <Icon size={17} />
+                                            </div>
+
+                                            {!isCollapsed && (
+                                                <span className="text-sm font-medium">
+                                                    {item.title}
+                                                </span>
+                                            )}
                                         </Link>
                                     </SidebarMenuButton>
                                 </SidebarMenuItem>
@@ -95,16 +159,21 @@ export default function AppSidebar() {
                         })}
                     </SidebarMenu>
                 </SidebarGroup>
+
+                <div className="flex-1" />
             </SidebarContent>
 
-            {/* Footer — Logout button */}
+            {/* Footer */}
             {isAuthenticated && (
-                <SidebarFooter className="p-3 border-t border-sidebar-border">
+                <SidebarFooter className="border-t border-sidebar-border/60 p-3">
                     <button
                         onClick={handleLogout}
-                        className="w-full flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium text-sidebar-foreground hover:bg-sidebar-accent/60 hover:text-sidebar-accent-foreground transition-colors cursor-pointer"
+                        className={`group flex h-12 w-full items-center rounded-2xl border border-transparent text-sm font-medium text-sidebar-foreground transition-all duration-200 hover:bg-red-500/10 hover:text-red-500 ${isCollapsed ? "justify-center px-0" : "gap-3 px-3"}`}
                     >
-                        <LogOut size={18} className="shrink-0" />
+                        <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-sidebar-accent/30 transition-colors group-hover:bg-red-500/10">
+                            <LogOut size={17} />
+                        </div>
+
                         {!isCollapsed && <span>Log Out</span>}
                     </button>
                 </SidebarFooter>
