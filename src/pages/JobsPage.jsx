@@ -146,7 +146,7 @@ export default function JobsPage() {
                     <div className="space-y-8 animate-in fade-in duration-300">
 
                         {/* The Job Grid */}
-                        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
+                        <div className="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 xl:grid-cols-3 gap-6">
                             {paginatedJobs.map((job) => (
                                 <JobCard key={job.id} job={job} />
                             ))}

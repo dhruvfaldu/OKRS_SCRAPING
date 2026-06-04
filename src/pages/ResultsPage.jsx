@@ -12,6 +12,7 @@ import RowDetailSheet from "../components/results/RowDetailSheet";
 import Pagination from "../components/results/Pagination";
 import EmptyState from "../components/results/EmptyState";
 import ResultsPageLoader from "../components/results/ResultsPageLoader";
+import { Card, CardHeader } from "@/components/ui/card";
 
 const PAGE_SIZE = 10;
 
@@ -82,11 +83,13 @@ export default function ResultsPage() {
   return (
     <div className="mx-auto max-w-7xl space-y-6 px-4 py-8 sm:px-6">
       {/* Header */}
-      <ResultsPageHeader
-        job={job}
-        totalRows={results.length}
-        totalColumns={columns.length}
-      />
+      <Card className="bg-card/60 border border-border/80  rounded-3xl shadow-sm p-4 sm:p-6 lg:p-8">
+        <ResultsPageHeader
+          job={job}
+          totalRows={results.length}
+          totalColumns={columns.length}
+        />
+      </Card>
 
       {/* Toolbar — search, view toggle, export */}
       <ResultsToolbar

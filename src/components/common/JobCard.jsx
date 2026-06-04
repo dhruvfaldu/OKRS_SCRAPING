@@ -76,7 +76,7 @@ export default function JobCard({ job }) {
       <CardHeader className="p-5 space-y-4">
 
         {/* Status */}
-        <div className="flex justify-between items-center">
+        <div className="flex flex-col sm:flex-row  items-start justify-between gap-2">
           <Badge className="bg-muted text-muted-foreground border border-border hover:bg-muted/80 text-[10px] font-bold uppercase tracking-wider rounded-lg select-none px-2 py-0.5">
             {job?.mode === "full_page" ? "HTML Page" : "Selectors Mode"}
           </Badge>
@@ -86,12 +86,12 @@ export default function JobCard({ job }) {
           >
             <span
               className={`h-1.5 w-1.5 rounded-full ${status === "completed"
-                ? "bg-emerald-500"
-                : status === "running"
-                  ? "bg-blue-500 animate-ping"
-                  : status === "failed"
-                    ? "bg-red-500"
-                    : "bg-amber-500 animate-pulse"
+                  ? "bg-emerald-500"
+                  : status === "running"
+                    ? "bg-blue-500 animate-ping"
+                    : status === "failed"
+                      ? "bg-red-500"
+                      : "bg-amber-500 animate-pulse"
                 }`}
             />
             <span>{status}</span>
@@ -109,7 +109,7 @@ export default function JobCard({ job }) {
               className="truncate text-base font-bold text-foreground leading-snug group-hover:text-primary transition-colors"
               title={job?.name}
             >
-              <div className="flex justify-between">
+              <div className="flex flex-col items-start sm:items-center sm:flex-row justify-between">
                 {job?.name || "Target Web Scraper"}
                 {job?.mode === "full_page" ? (
                   <span className="text-xs text-muted-foreground">(Full Page)</span>
@@ -137,10 +137,10 @@ export default function JobCard({ job }) {
         </div>
       </CardHeader>
 
-      <hr className="border-border/60 mx-5" />
+      {/* <hr className="border-border/60 mx-5" /> */}
 
       {/* Details */}
-      {/* <div className="px-5 py-4 space-y-2.5 text-xs text-muted-foreground flex-1">
+      <div className="px-5 py-4 space-y-2.5 text-xs text-muted-foreground flex-1">
         <div className="flex items-center justify-between">
           <span className="flex items-center gap-1.5">
             <Calendar className="w-3.5 h-3.5 text-muted-foreground/60" />
@@ -164,7 +164,7 @@ export default function JobCard({ job }) {
             </span>
           </div>
         )}
-      </div> */}
+      </div>
 
       {/* Footer */}
       <div className="flex gap-2 items-center p-3 bg-muted/10">
@@ -216,18 +216,7 @@ export default function JobCard({ job }) {
               variant="outline"
               size="icon"
               disabled={deleting}
-              className="
-        group relative h-10 w-10 shrink-0 overflow-hidden
-        rounded-2xl border border-border/70
-        bg-background/60 backdrop-blur-sm
-        transition-all duration-300
-        hover:border-red-500/30
-        hover:bg-red-500/10
-        hover:shadow-lg hover:shadow-red-500/10
-        active:scale-95
-        disabled:pointer-events-none disabled:opacity-50
-      "
-            >
+              className="group relative h-10 w-10 shrink-0 overflow-hidden rounded-2xl border border-border/70 bg-background/60 backdrop-blur-sm transition-all duration-300 hover:border-red-500/30 hover:bg-red-500/10 hover:shadow-lg hover:shadow-red-500/10 active:scale-95 disabled:pointer-events-none disabled:opacity-50 ">
               {/* Glow */}
               <div className="absolute inset-0 bg-gradient-to-br from-red-500/0 via-red-500/0 to-red-500/10 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
 
@@ -239,81 +228,43 @@ export default function JobCard({ job }) {
           </AlertDialogTrigger>
 
           <AlertDialogContent
-            className="
-      max-w-md overflow-hidden rounded-[28px]
-      border border-border/70
-      bg-background/95
-      p-0 shadow-2xl backdrop-blur-2xl
-    "
-          >
+            className="max-w-md overflow-hidden rounded-[28px] border border-border/70 bg-background/95 p-0 shadow-2xl backdrop-blur-2xl ">
             {/* Top Gradient */}
             <div className="h-1 w-full bg-gradient-to-r from-red-500/80 via-red-400/60 to-orange-400/70" />
 
             <div className="p-6">
 
               {/* Icon */}
-              <div className="mb-5 flex items-center justify-center">
+              <div className="mb-5 flex  items-center justify-center gap-4">
                 <div className="relative">
                   <div className="absolute inset-0 rounded-full bg-red-500/20 blur-2xl" />
 
-                  <div
-                    className="
-              relative flex h-16 w-16 items-center justify-center
-              rounded-3xl border border-red-500/20
-              bg-red-500/10
-            "
-                  >
+                  <div className="relative flex h-12 w-12 items-center justify-center rounded-2xl border border-red-500/20 bg-red-500/10 ">
                     <RiDeleteBin6Line
-                      size={28}
+                      size={20}
                       className="text-red-500"
                     />
                   </div>
                 </div>
+
+                <AlertDialogHeader className=" text-center">
+                  <AlertDialogTitle className="text-xl font-bold tracking-tight text-foreground">
+                    Delete Scraper Job?
+                  </AlertDialogTitle>
+
+                  <AlertDialogDescription className="mx-auto max-w-xs text-sm leading-6 text-muted-foreground">
+                    This will permanently remove your scraper workflow,
+                    logs, and generated results.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
               </div>
 
-              <AlertDialogHeader className="space-y-3 text-center">
-                <AlertDialogTitle className="text-xl font-bold tracking-tight text-foreground">
-                  Delete Scraper Job?
-                </AlertDialogTitle>
-
-                <AlertDialogDescription className="mx-auto max-w-xs text-sm leading-6 text-muted-foreground">
-                  This will permanently remove your scraper workflow,
-                  logs, and generated results.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-
-              {/* Info Box */}
-              <div className="mt-5 rounded-2xl border border-border/60 bg-muted/30 p-4">
-                <div className="flex items-start gap-3">
-                  <div className="mt-0.5 flex h-8 w-8 items-center justify-center rounded-xl bg-red-500/10">
-                    <RiAlarmWarningLine
-                      size={16}
-                      className="text-red-500"
-                    />
-                  </div>
-
-                  <div className="flex flex-col">
-                    <span className="text-sm font-semibold text-foreground">
-                      This action cannot be undone
-                    </span>
-
-                    <span className="mt-1 text-xs leading-5 text-muted-foreground">
-                      Once deleted, the scraper data will no longer be recoverable.
-                    </span>
-                  </div>
-                </div>
-              </div>
 
               {/* Footer */}
               <AlertDialogFooter className="mt-7 flex gap-3">
                 <AlertDialogCancel
                   disabled={deleting}
-                  className="
-            h-11 flex-1 rounded-2xl border border-border/70
-            bg-background font-semibold transition-all duration-200
-            hover:bg-muted/50
-          "
-                >
+                  className="h-11 flex-1 rounded-2xl border border-border bg-background font-semibold transition-all duration-200 hover:bg-muted/50">
                   Cancel
                 </AlertDialogCancel>
 
@@ -337,14 +288,7 @@ export default function JobCard({ job }) {
                         setDeleting(false);
                       });
                   }}
-                  className="
-            h-11 min-w-[140px] rounded-2xl
-            bg-red-600 font-semibold text-white
-            transition-all duration-200
-            hover:bg-red-700 hover:shadow-lg hover:shadow-red-500/20
-            active:scale-[0.98]
-          "
-                >
+                  className="h-11 min-w-[140px] rounded-2xl bg-red-600 font-semibold text-white transition-all duration-200 hover:bg-red-700 hover:shadow-lg hover:shadow-red-500/20active:scale-[0.98]">
                   {deleting ? (
                     <Loader size="xs" className="text-white" />
                   ) : (

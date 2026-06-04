@@ -78,7 +78,7 @@ const Navbar = () => {
                 <div className="flex items-center gap-2">
 
                     {/* Activity */}
-                    <div className="hidden lg:flex items-center gap-2 rounded-xl border border-border bg-card px-3 py-2 shadow-sm">
+                    {/* <div className="hidden lg:flex items-center gap-2 rounded-xl border border-border bg-card px-3 py-2 shadow-sm">
                         <Activity className="h-4 w-4 text-primary" />
 
                         <div className="flex flex-col leading-none gap-1">
@@ -90,7 +90,7 @@ const Navbar = () => {
                                 All Systems Operational
                             </span>
                         </div>
-                    </div>
+                    </div> */}
 
                     {/* Theme Toggle */}
                     <Button

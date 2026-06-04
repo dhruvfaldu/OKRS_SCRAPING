@@ -187,7 +187,7 @@ function Home() {
                                 <ul className="divide-y divide-border">
                                     {recentJobs.map((job, idx) => (
                                         <li
-                                            key={idx}
+                                            key={job.id}
                                             className="group relative overflow-hidden rounded-2xl border border-transparent bg-background/40 mb-2 p-4 transition-all duration-300 hover:border-border hover:bg-accent/20 hover:shadow-sm"
                                         >
                                             <div className="flex items-start gap-4">
@@ -206,7 +206,7 @@ function Home() {
                                                 </div>
 
                                                 {/* Content */}
-                                                <div className="flex-1 space-y-2">
+                                                <div className="flex-1 space-y-1">
                                                     <p className="text-sm leading-6 text-foreground">
                                                         Job{" "}
                                                         <span className="font-semibold text-primary">
@@ -232,7 +232,9 @@ function Home() {
                                                         <span className="h-2 w-2 rounded-full bg-muted-foreground/40" />
 
                                                         <span>
-                                                            {new Date(job.createdAt || Date.now()).toLocaleDateString()}
+                                                            {job?.created_at
+                                                                ? job.created_at.split("T")[0]
+                                                                : "No Date"}
                                                         </span>
 
                                                         <span className="h-2 w-2 rounded-full bg-muted-foreground/40" />

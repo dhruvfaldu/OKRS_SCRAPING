@@ -40,9 +40,9 @@ export default function ResultsPageHeader({ job, totalRows, totalColumns }) {
         variant="ghost"
         size="sm"
         onClick={() => navigate("/jobs")}
-        className="gap-1.5 text-muted-foreground hover:text-foreground"
+        className="gap-1.5 text-sm p-0 text-muted-foreground hover:text-foreground"
       >
-        <ArrowLeft className="h-4 w-4" />
+        <ArrowLeft className="h-6 w-6" />
         Back to Jobs
       </Button>
 
