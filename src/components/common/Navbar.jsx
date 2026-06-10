@@ -3,39 +3,24 @@ import { toast } from "sonner";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { useSelector, useDispatch } from "react-redux";
 import { logout } from "../../store/slices/authSlice";
-import {
-    LogOut,
-    Moon,
-    Sun,
-    Activity,
-} from "lucide-react";
-
-import {
-    DropdownMenu,
-    DropdownMenuTrigger,
-    DropdownMenuContent,
-    DropdownMenuLabel,
-    DropdownMenuSeparator,
-    DropdownMenuItem,
-} from "@/components/ui/dropdown-menu";
-
-import {
-    Avatar,
-    AvatarFallback,
-} from "@/components/ui/avatar";
-
+import { LogOut, Moon, Sun, Activity, Search } from "lucide-react";
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuItem, } from "@/components/ui/dropdown-menu";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { useLocation } from "react-router-dom";
+import { setJobSearch } from "../../store/slices/jobSlice";
 
 const Navbar = () => {
-    const { isAuthenticated, user } = useSelector(
-        (state) => state.auth
-    );
-
+    const { isAuthenticated, user } = useSelector((state) => state.auth);
     const { theme, setTheme } = useTheme();
 
     const dispatch = useDispatch();
     const navigate = useNavigate();
+    const location = useLocation();
+
+    const isJobsPage = location.pathname === "/jobs";
 
     const toggleTheme = () => {
         setTheme(theme === "light" ? "dark" : "light");
@@ -55,7 +40,7 @@ const Navbar = () => {
 
     return (
         <nav className="sticky top-0 z-40 w-full border-b border-border/50 bg-background/80 backdrop-blur-xl">
-            <div className="flex h-16 items-center justify-between px-4 sm:px-6">
+            <div className="flex h-16 items-center justify-between px-4 sm:px-6 gap-2">
 
                 {/* Left */}
                 <div className="flex items-center gap-3">
@@ -75,22 +60,20 @@ const Navbar = () => {
                 </div>
 
                 {/* Right */}
-                <div className="flex items-center gap-2">
-
-                    {/* Activity */}
-                    {/* <div className="hidden lg:flex items-center gap-2 rounded-xl border border-border bg-card px-3 py-2 shadow-sm">
-                        <Activity className="h-4 w-4 text-primary" />
-
-                        <div className="flex flex-col leading-none gap-1">
-                            <span className="text-[11px] font-semibold text-foreground">
-                                System Status
-                            </span>
-
-                            <span className="text-[10px] text-emerald-500">
-                                All Systems Operational
-                            </span>
+                <div className="flex items-center gap-2 w-[70%] sm:w-auto justify-end md:w-auto">
+                    {/* Search (only on Jobs page) */}
+                    {isJobsPage && (
+                        <div className="relative w-80">
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                            <Input
+                                placeholder="Search jobs..."
+                                className="pl-10 pr-9 bg-muted/50 placeholder:text-muted-foreground focus:bg-muted/50"
+                                onChange={(e) =>
+                                    dispatch(setJobSearch(e.target.value))
+                                }
+                            />
                         </div>
-                    </div> */}
+                    )}
 
                     {/* Theme Toggle */}
                     <Button
