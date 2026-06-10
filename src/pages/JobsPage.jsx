@@ -1,5 +1,5 @@
-import React, { useEffect } from "react";
-import { Plus, BriefcaseBusiness, Activity, Clock3, RotateCw, Sparkles } from "lucide-react";
+import React, { useEffect, useMemo } from "react";
+import { Plus, BriefcaseBusiness, Activity, Clock3, RotateCw, Sparkles, Search } from "lucide-react";
 import { useSelector, useDispatch } from "react-redux";
 import { fetchJobs } from "../store/slices/jobSlice";
 import JobCard from "../components/common/JobCard";
@@ -8,6 +8,10 @@ import NoDataFound from "../components/error/NoDataFound";
 import TableError from "../components/error/TableError";
 import Pagination from "../components/common/Pagination";
 import { Link, useSearchParams } from "react-router-dom";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+// import { useDebounce } from "use-debounce";
+import { useState } from "react";
 
 /**
  * JobsPage - Upgraded high-fidelity Jobs dashboard list
@@ -23,20 +27,33 @@ export default function JobsPage() {
 
     const dispatch = useDispatch();
     const { items: jobs = [], isLoading, isFetching, error } = useSelector((state) => state.jobs);
+    const search = useSelector((state) => state.jobs.jobSearch);
+
+    const filteredJobs = jobs.filter((job) => {
+        if (!search.trim()) return true;
+
+        const query = search.toLowerCase();
+
+        return (
+            job?.name?.toLowerCase().includes(query) ||
+            job?.status?.toLowerCase().includes(query) ||
+            job?.url?.toLowerCase().includes(query)
+        );
+    });
 
     useEffect(() => {
         dispatch(fetchJobs());
     }, [dispatch]);
 
     // Stats
-    const count = jobs.length;
-    const completed = jobs.filter((j) => j?.status === "completed").length;
+    const count = filteredJobs.length;
+    const completed = filteredJobs.filter((j) => j?.status === "completed").length;
     const pending = count - completed;
 
     // Pagination configuration
     const perPage = 9;
     const startIndex = (page - 1) * perPage;
-    const paginatedJobs = jobs.slice(startIndex, startIndex + perPage);
+    const paginatedJobs = filteredJobs.slice(startIndex, startIndex + perPage);
     const maxPages = Math.ceil(count / perPage);
     const hasNextPage = page < maxPages;
 
@@ -45,7 +62,7 @@ export default function JobsPage() {
             <div className="max-w-7xl mx-auto space-y-8">
 
                 {/* 1. Header Banner */}
-                <div className="relative overflow-hidden rounded-3xl border border-border/80 bg-card p-6 sm:p-7 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div className="relative overflow-hidden rounded-3xl border border-border/80 bg-card p-6 sm:p-7 shadow-sm flex flex-col sm:flex-row sm:items-center  justify-between gap-4">
                     {/* Glow background */}
                     <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/4 pointer-events-none" />
 
@@ -146,7 +163,7 @@ export default function JobsPage() {
                     <div className="space-y-8 animate-in fade-in duration-300">
 
                         {/* The Job Grid */}
-                        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
+                        <div className="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 xl:grid-cols-3 gap-6">
                             {paginatedJobs.map((job) => (
                                 <JobCard key={job.id} job={job} />
                             ))}

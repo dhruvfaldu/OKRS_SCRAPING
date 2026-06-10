@@ -1,9 +1,13 @@
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Search, Download, FileJson, X, TableProperties } from "lucide-react";
+import { useSelector } from "react-redux";
 
 export default function ResultsToolbar({ search, setSearch, onExport, view, onViewChange }) {
   const hasSearch = search?.trim().length > 0;
+
+  const { selectedJob } = useSelector((s) => s.jobs);
+  const results = selectedJob?.results || [];
 
   return (
     <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -34,8 +38,8 @@ export default function ResultsToolbar({ search, setSearch, onExport, view, onVi
           <button
             onClick={() => onViewChange("table")}
             className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${view === "table"
-                ? "bg-background text-foreground shadow-sm"
-                : "text-muted-foreground hover:text-foreground"
+              ? "bg-background text-foreground shadow-sm"
+              : "text-muted-foreground hover:text-foreground"
               }`}
           >
             <TableProperties className="h-4 w-4" />
@@ -44,8 +48,8 @@ export default function ResultsToolbar({ search, setSearch, onExport, view, onVi
           <button
             onClick={() => onViewChange("json")}
             className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${view === "json"
-                ? "bg-background text-foreground shadow-sm"
-                : "text-muted-foreground hover:text-foreground"
+              ? "bg-background text-foreground shadow-sm"
+              : "text-muted-foreground hover:text-foreground"
               }`}
           >
             <FileJson className="h-4 w-4" />
@@ -54,7 +58,7 @@ export default function ResultsToolbar({ search, setSearch, onExport, view, onVi
         </div>
 
         {/* Export */}
-        <Button onClick={onExport} size="sm" className="gap-1.5">
+        <Button onClick={onExport} disabled={results.length === 0} size="sm" className="gap-1.5">
           <Download className="h-4 w-4" />
           Export
         </Button>

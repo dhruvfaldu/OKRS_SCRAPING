@@ -34,7 +34,7 @@ export default function AppSidebar() {
 
     const menuItems = [
         { title: "Dashboard", url: "/", icon: Home },
-        { title: "Create Job", url: "/create", icon: Plus },
+        { title: "Create Scraper Job", url: "/create", icon: Plus },
         { title: "Jobs", url: "/jobs", icon: BarChart },
     ];
 
@@ -92,7 +92,7 @@ export default function AppSidebar() {
                 </div>
 
                 {/* Workspace */}
-                {!isCollapsed && (
+                {/* {!isCollapsed && (
                     <div className="mx-3 mt-4 rounded-2xl border border-sidebar-border/60 bg-sidebar-accent/20 p-4">
                         <div className="flex items-start gap-3">
                             <div className="mt-0.5 rounded-lg bg-primary/10 p-2">
@@ -110,10 +110,10 @@ export default function AppSidebar() {
                             </div>
                         </div>
                     </div>
-                )}
+                )} */}
 
                 {/* Navigation */}
-                <SidebarGroup className="mt-5 px-3">
+                <SidebarGroup className="mt-3 px-3">
                     {!isCollapsed && (
                         <p className="mb-3 px-3 text-[11px] font-semibold uppercase tracking-[0.2em] text-sidebar-foreground/40">
                             Navigation
@@ -143,7 +143,15 @@ export default function AppSidebar() {
                                             className={`flex items-center ${isCollapsed ? "justify-center" : "gap-3"}`}
                                             onClick={() => isMobile && setOpenMobile(false)}
                                         >
-                                            <div className={`flex items-center justify-center rounded-xl transition-colors ${isCollapsed ? "h-10 w-10" : "h-8 w-8"} ${isActive ? "bg-white/10" : "bg-sidebar-accent/30 group-hover:bg-sidebar-accent/50"}`}>
+                                            <div
+                                                className={`flex items-center justify-center rounded-xl transition-colors ${isCollapsed ? "h-10 w-10" : "h-8 w-8"
+                                                    } ${isCollapsed
+                                                        ? ""
+                                                        : isActive
+                                                            ? "bg-white/10"
+                                                            : "bg-sidebar-accent/30 group-hover:bg-sidebar-accent/50"
+                                                    }`}
+                                            >
                                                 <Icon size={17} />
                                             </div>
 

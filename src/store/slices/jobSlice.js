@@ -47,12 +47,21 @@ const initialState = {
   error: null,
   selectedJob: null,
   isResultsLoading: false,
+  jobSearch: "",
 };
 
 const jobSlice = createSlice({
   name: "jobs",
   initialState,
-  reducers: {},
+  reducers: {
+    setJobSearch(state, action) {
+      state.jobSearch = action.payload;
+    },
+
+    clearJobSearch(state) {
+      state.jobSearch = "";
+    },
+  },
   extraReducers: (builder) => {
     // fetchJobs
     builder.addCase(fetchJobs.pending, (state) => {
@@ -141,5 +150,7 @@ const jobSlice = createSlice({
     });
   },
 });
+
+export const { setJobSearch, clearJobSearch } = jobSlice.actions;
 
 export default jobSlice.reducer;
