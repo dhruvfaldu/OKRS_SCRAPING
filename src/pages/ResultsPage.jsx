@@ -14,6 +14,7 @@ import EmptyState from "../components/results/EmptyState";
 import ResultsPageLoader from "../components/results/ResultsPageLoader";
 import { Card, CardHeader } from "@/components/ui/card";
 import useDebounce from "../hooks/useDebounce";
+import NoSearchResults from "../components/loaders/NoSearchResults";
 
 const PAGE_SIZE = 10;
 
@@ -51,7 +52,7 @@ export default function ResultsPage() {
     );
   }, [results, debouncedSearch]);
 
-  const totalPages = Math.ceil(filteredResults.length / PAGE_SIZE);
+  const totalPages = Math.max(1, Math.ceil(filteredResults.length / PAGE_SIZE));
 
   const paginatedData = useMemo(
     () => filteredResults.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE),
@@ -109,8 +110,10 @@ export default function ResultsPage() {
       {/* Content */}
       {results.length === 0 ? (
         <EmptyState />
+      ) : filteredResults.length === 0 ? (
+        <NoSearchResults search={search} />
       ) : view === "json" ? (
-        <JsonViewer data={results} />
+        <JsonViewer data={filteredResults} />
       ) : (
         <>
           <ResultsTable
