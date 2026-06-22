@@ -3,7 +3,7 @@ import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/ca
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useNavigate } from "react-router-dom";
-import { RiAlarmWarningLine, RiDeleteBin5Line, RiDeleteBin6Line } from "react-icons/ri";
+import { RiDeleteBin6Line } from "react-icons/ri";
 import { BarChart, RotateCw, Globe, Play, ExternalLink, Calendar, Code } from "lucide-react";
 import {
   AlertDialog,
@@ -37,8 +37,7 @@ export default function JobCard({ job }) {
     pending: "bg-amber-500/10 text-amber-600 border-amber-500/25",
   };
 
-  const statusClass =
-    statusColors[status] || "bg-muted text-muted-foreground border-border";
+  const statusClass = statusColors[status] || "bg-muted text-muted-foreground border-border";
 
   const firstLetter = (job?.name || "J").charAt(0).toUpperCase();
 
@@ -149,7 +148,9 @@ export default function JobCard({ job }) {
             </span>
 
             <span className="font-medium text-foreground">
-              {job.created_at.split("T")[0]}
+              {job?.created_at
+                ? job.created_at.split("T")[0]
+                : "N/A"}
             </span>
           </div>
 
@@ -168,47 +169,101 @@ export default function JobCard({ job }) {
         </div>
 
         {/* Footer */}
-        <div className="flex gap-2 items-center px-3 bg-muted/10">
+        <div className="flex flex-wrap gap-2 items-center px-3 py-3 bg-muted/10">
 
-          {/* Run Button */}
-          {running ? (
-            <Button disabled className="flex-1 rounded-xl">
-              <Loader size="xs" className="mr-2 text-current" />
-              Deploying...
+          {/* Pending */}
+          {status === "pending" && (
+            <Button
+              className="flex-1 rounded-xl font-semibold"
+              onClick={handleRunOrRetry}
+              disabled={running}
+            >
+              {running ? (
+                <>
+                  <Loader size="xs" className="mr-2" />
+                  Starting...
+                </>
+              ) : (
+                <>
+                  <Play className="w-4 h-4 mr-2" />
+                  Run Job
+                </>
+              )}
             </Button>
-          ) : (
-            (status === "completed" || status === "failed") && (
+          )}
+
+          {/* Running */}
+          {status === "running" && (
+            <Button
+              disabled
+              className="flex-1 rounded-xl"
+            >
+              {running ? (
+                <>
+                  <Loader size="xs" className="mr-2" />
+                  Starting...
+                </>
+              ) : (
+                <>
+                  <Loader size="xs" className="mr-2 text-current" />
+                  Running...
+                </>
+              )}
+            </Button>
+          )}
+
+          {/* Completed */}
+          {status === "completed" && (
+            <>
               <Button
-                className={`flex-1 rounded-xl font-semibold shadow-2xs hover:shadow-md cursor-pointer ${status === "failed"
-                  ? "bg-red-600 text-white hover:bg-red-700 hover:shadow-red-600/10"
-                  : "bg-primary text-primary-foreground hover:bg-primary/95"
-                  }`}
+                className="flex-1 rounded-xl font-semibold"
                 onClick={handleRunOrRetry}
+                disabled={running}
               >
-                {status === "failed" ? (
+                {running ? (
                   <>
-                    <RotateCw className="w-3.5 h-3.5 mr-1.5" />
-                    Retry Job
+                    <Loader size="xs" className="mr-2" />
+                    Starting...
                   </>
                 ) : (
                   <>
-                    <Play className="w-3.5 h-3.5 mr-1.5" />
-                    Run Job
+                    <RotateCw className="w-4 h-4 mr-2" />
+                    Run Again
                   </>
                 )}
               </Button>
-            )
+
+              <Button
+                variant="secondary"
+                className="flex-1 rounded-xl font-semibold border border-border/80"
+                onClick={() => navigate(`/results/${job.id}`)}
+              >
+                <BarChart className="w-4 h-4 mr-2" />
+                Results
+              </Button>
+            </>
           )}
 
-          {/* Results */}
-          <Button
-            variant="secondary"
-            className="flex-1 rounded-xl font-semibold hover:bg-muted cursor-pointer border border-border/80"
-            onClick={() => navigate(`/results/${job.id}`)}
-          >
-            <BarChart className="w-3.5 h-3.5 mr-1.5" />
-            Results
-          </Button>
+          {/* Failed */}
+          {status === "failed" && (
+            <Button
+              className="flex-1 rounded-xl bg-red-600 hover:bg-red-700 text-white"
+              onClick={handleRunOrRetry}
+              disabled={running}
+            >
+              {running ? (
+                <>
+                  <Loader size="xs" className="mr-2" />
+                  Starting...
+                </>
+              ) : (
+                <>
+                  <RotateCw className="w-4 h-4 mr-2" />
+                  Retry Job
+                </>
+              )}
+            </Button>
+          )}
 
           {/* Delete */}
           <AlertDialog>
@@ -216,7 +271,7 @@ export default function JobCard({ job }) {
               <Button
                 variant="outline"
                 size="icon"
-                disabled={deleting}
+                disabled={deleting || status === "running"}
                 className="group relative h-10 w-10 shrink-0 overflow-hidden rounded-2xl border border-border/70 bg-background/60 backdrop-blur-sm transition-all duration-300 hover:border-red-500/30 hover:bg-red-500/10 hover:shadow-lg hover:shadow-red-500/10 active:scale-95 disabled:pointer-events-none disabled:opacity-50 ">
                 {/* Glow */}
                 <div className="absolute inset-0 bg-gradient-to-br from-red-500/0 via-red-500/0 to-red-500/10 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
@@ -228,6 +283,7 @@ export default function JobCard({ job }) {
               </Button>
             </AlertDialogTrigger>
 
+            {/* Existing AlertDialogContent */}
             <AlertDialogContent
               className="max-w-md overflow-hidden rounded-[28px] border border-border/70 bg-background/95 p-0 shadow-2xl backdrop-blur-2xl ">
               {/* Top Gradient */}
@@ -235,7 +291,7 @@ export default function JobCard({ job }) {
 
               <div className="p-6">
 
-                {/* Icon */}
+                Icon
                 <div className="mb-5 flex  items-center justify-center gap-4">
                   <div className="relative">
                     <div className="absolute inset-0 rounded-full bg-red-500/20 blur-2xl" />
@@ -260,8 +316,7 @@ export default function JobCard({ job }) {
                   </AlertDialogHeader>
                 </div>
 
-
-                {/* Footer */}
+                Footer
                 <AlertDialogFooter className="mt-7 flex gap-3">
                   <AlertDialogCancel
                     disabled={deleting}
@@ -280,12 +335,13 @@ export default function JobCard({ job }) {
                         .unwrap()
                         .then(() => {
                           toast.success("Scraper deleted successfully");
+                          setDeleting(false);
                         })
                         .catch((err) => {
-                          toast.error(
-                            err?.message || "Failed to delete workflow"
-                          );
-
+                          toast.error(err?.message || "Failed to delete workflow");
+                          setDeleting(false);
+                        })
+                        .finally(() => {
                           setDeleting(false);
                         });
                     }}
@@ -303,8 +359,147 @@ export default function JobCard({ job }) {
               </div>
             </AlertDialogContent>
           </AlertDialog>
+
         </div>
+
       </Card>
     </>
   );
 }
+
+{/* Footer */ }
+{/* <div className="flex flex-wrap  gap-2 items-center px-3 bg-muted/10">
+
+  Run Button
+  {running ? (
+    <Button disabled className="flex-1 rounded-xl">
+      <Loader size="xs" className="mr-2 text-current" />
+      Deploying...
+    </Button>
+  ) : (
+    (status === "completed" || status === "failed") && (
+      <Button
+        className={`flex-1 rounded-xl font-semibold shadow-2xs hover:shadow-md cursor-pointer ${status === "failed"
+          ? "bg-red-600 text-white hover:bg-red-700 hover:shadow-red-600/10"
+          : "bg-primary text-primary-foreground hover:bg-primary/95"
+          }`}
+        onClick={handleRunOrRetry}
+      >
+        {status === "failed" ? (
+          <>
+            <RotateCw className="w-3.5 h-3.5 mr-1.5" />
+            Retry Job
+          </>
+        ) : (
+          <>
+            <Play className="w-3.5 h-3.5 mr-1.5" />
+            Run Job
+          </>
+        )}
+      </Button>
+    )
+  )}
+
+  Results
+  <Button
+    variant="secondary"
+    className="flex-1 rounded-xl font-semibold hover:bg-muted cursor-pointer border border-border/80"
+    onClick={() => navigate(`/results/${job.id}`)}
+  >
+    <BarChart className="w-3.5 h-3.5 mr-1.5" />
+    Results
+  </Button>
+
+  Delete
+  <AlertDialog>
+    <AlertDialogTrigger asChild>
+      <Button
+        variant="outline"
+        size="icon"
+        disabled={deleting}
+        className="group relative h-10 w-10 shrink-0 overflow-hidden rounded-2xl border border-border/70 bg-background/60 backdrop-blur-sm transition-all duration-300 hover:border-red-500/30 hover:bg-red-500/10 hover:shadow-lg hover:shadow-red-500/10 active:scale-95 disabled:pointer-events-none disabled:opacity-50 ">
+        Glow
+        <div className="absolute inset-0 bg-gradient-to-br from-red-500/0 via-red-500/0 to-red-500/10 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+
+        <RiDeleteBin6Line
+          size={16}
+          className="relative z-10 text-muted-foreground transition-all duration-300 group-hover:scale-110 group-hover:text-red-500"
+        />
+      </Button>
+    </AlertDialogTrigger>
+
+    <AlertDialogContent
+      className="max-w-md overflow-hidden rounded-[28px] border border-border/70 bg-background/95 p-0 shadow-2xl backdrop-blur-2xl ">
+      Top Gradient
+      <div className="h-1 w-full bg-gradient-to-r from-red-500/80 via-red-400/60 to-orange-400/70" />
+
+      <div className="p-6">
+
+        Icon
+        <div className="mb-5 flex  items-center justify-center gap-4">
+          <div className="relative">
+            <div className="absolute inset-0 rounded-full bg-red-500/20 blur-2xl" />
+
+            <div className="relative flex h-12 w-12 items-center justify-center rounded-2xl border border-red-500/20 bg-red-500/10 ">
+              <RiDeleteBin6Line
+                size={20}
+                className="text-red-500"
+              />
+            </div>
+          </div>
+
+          <AlertDialogHeader className=" text-center">
+            <AlertDialogTitle className="text-xl font-bold tracking-tight text-foreground">
+              Delete Scraper Job?
+            </AlertDialogTitle>
+
+            <AlertDialogDescription className="mx-auto max-w-xs text-sm leading-6 text-muted-foreground">
+              This will permanently remove your scraper workflow,
+              logs, and generated results.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+        </div>
+
+        Footer
+        <AlertDialogFooter className="mt-7 flex gap-3">
+          <AlertDialogCancel
+            disabled={deleting}
+            className="h-11 flex-1 rounded-2xl border border-border bg-background font-semibold transition-all duration-200 hover:bg-muted/50">
+            Cancel
+          </AlertDialogCancel>
+
+          <AlertDialogAction
+            disabled={deleting}
+            onClick={(e) => {
+              e.preventDefault();
+
+              setDeleting(true);
+
+              dispatch(deleteJob(job.id))
+                .unwrap()
+                .then(() => {
+                  toast.success("Scraper deleted successfully");
+                })
+                .catch((err) => {
+                  toast.error(
+                    err?.message || "Failed to delete workflow"
+                  );
+
+                  setDeleting(false);
+                });
+            }}
+            className="h-11 min-w-[140px] rounded-2xl bg-red-600 font-semibold text-white transition-all duration-200 hover:bg-red-700 hover:shadow-lg hover:shadow-red-500/20active:scale-[0.98]">
+            {deleting ? (
+              <Loader size="xs" className="text-white" />
+            ) : (
+              <div className="flex items-center gap-2">
+                <RiDeleteBin6Line size={15} />
+                Delete Job
+              </div>
+            )}
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </div>
+    </AlertDialogContent>
+  </AlertDialog>
+</div> */}

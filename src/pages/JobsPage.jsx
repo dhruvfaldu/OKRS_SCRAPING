@@ -10,8 +10,9 @@ import Pagination from "../components/common/Pagination";
 import { Link, useSearchParams } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-// import { useDebounce } from "use-debounce";
 import { useState } from "react";
+import useDebounce from "../hooks/useDebounce";
+
 
 /**
  * JobsPage - Upgraded high-fidelity Jobs dashboard list
@@ -28,18 +29,21 @@ export default function JobsPage() {
     const dispatch = useDispatch();
     const { items: jobs = [], isLoading, isFetching, error } = useSelector((state) => state.jobs);
     const search = useSelector((state) => state.jobs.jobSearch);
+    const debouncedSearch = useDebounce(search, 300);
 
-    const filteredJobs = jobs.filter((job) => {
-        if (!search.trim()) return true;
+    const filteredJobs = useMemo(() => {
+        return jobs.filter((job) => {
+            if (!debouncedSearch.trim()) return true;
 
-        const query = search.toLowerCase();
+            const query = debouncedSearch.toLowerCase();
 
-        return (
-            job?.name?.toLowerCase().includes(query) ||
-            job?.status?.toLowerCase().includes(query) ||
-            job?.url?.toLowerCase().includes(query)
-        );
-    });
+            return (
+                job?.name?.toLowerCase().includes(query) ||
+                job?.status?.toLowerCase().includes(query) ||
+                job?.url?.toLowerCase().includes(query)
+            );
+        });
+    }, [jobs, debouncedSearch]);
 
     useEffect(() => {
         dispatch(fetchJobs());
@@ -78,7 +82,7 @@ export default function JobsPage() {
                         </div>
                     </div>
 
-                    <div className="flex items-center gap-3 relative z-10 shrink-0">
+                    <div className="flex flex-col sm:flex-row md:flex-col lg:flex-row items-center gap-3 relative z-10 shrink-0">
                         <button
                             onClick={() => dispatch(fetchJobs())}
                             className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-border/80 bg-background/50 hover:bg-muted text-xs font-semibold text-muted-foreground hover:text-foreground transition cursor-pointer"
@@ -108,7 +112,7 @@ export default function JobsPage() {
                             <BriefcaseBusiness size={18} />
                         </div>
                         <div className="space-y-0.5">
-                            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Total Scrapers</p>
+                            <p className="text-[10px] md:text-[8px] font-bold text-muted-foreground uppercase tracking-wider">Total Scrapers</p>
                             <p className="text-xl font-bold text-foreground leading-none">{isLoading ? "..." : count}</p>
                         </div>
                     </div>
@@ -119,7 +123,7 @@ export default function JobsPage() {
                             <Activity size={18} />
                         </div>
                         <div className="space-y-0.5">
-                            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Active Completed</p>
+                            <p className=" md:text-[8px] text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Active Completed</p>
                             <p className="text-xl font-bold text-foreground leading-none">{isLoading ? "..." : completed}</p>
                         </div>
                     </div>
@@ -130,7 +134,7 @@ export default function JobsPage() {
                             <Clock3 size={18} />
                         </div>
                         <div className="space-y-0.5">
-                            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Deployments Queue</p>
+                            <p className="text-[10px] md:text-[8px]  font-bold text-muted-foreground uppercase  tracking-wider">Deployments Queue</p>
                             <p className="text-xl font-bold text-foreground leading-none">{isLoading ? "..." : pending}</p>
                         </div>
                     </div>
@@ -138,7 +142,7 @@ export default function JobsPage() {
 
                 {/* 3. Main Data Content Grid */}
                 {error ? (
-                    <div className="max-w-xl mx-auto pt-6 animate-in zoom-in-95 duration-300">
+                    <div className=" mx-auto pt-6 animate-in zoom-in-95 duration-300">
                         <TableError
                             message={error}
                             onRetry={() => dispatch(fetchJobs())}
@@ -173,10 +177,9 @@ export default function JobsPage() {
                         {maxPages > 1 && (
                             <div className="flex justify-center pt-2">
                                 <Pagination
-                                    page={page}
-                                    setPage={setPage}
-                                    hasNextPage={hasNextPage}
-                                    maxpages={maxPages}
+                                    currentPage={page}
+                                    totalPages={maxPages}
+                                    onPageChange={setPage}
                                 />
                             </div>
                         )}
