@@ -29,7 +29,7 @@ export default function JobsPage() {
     const dispatch = useDispatch();
     const { items: jobs = [], isLoading, isFetching, error } = useSelector((state) => state.jobs);
     const search = useSelector((state) => state.jobs.jobSearch);
-    const debouncedSearch = useDebounce(search, 3000);
+    const debouncedSearch = useDebounce(search, 300);
 
     const filteredJobs = useMemo(() => {
         return jobs.filter((job) => {
