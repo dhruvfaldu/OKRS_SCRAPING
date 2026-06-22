@@ -15,9 +15,7 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table";
-
 import { Badge } from "@/components/ui/badge";
-
 import { Button } from "@/components/ui/button";
 
 function Home() {
@@ -34,40 +32,42 @@ function Home() {
     }, [dispatch]);
 
     const count = jobs.length;
-    // TODO: When backend is available, remove useLocalStorage and uncomment the below code
-    // const completedCount = jobs.filter((job) => job?.status === "completed").length;
-    const completedCount = jobs.filter((job) => (jobStatusMap[job.id] || job?.status || "pending").toLowerCase() === "completed").length;
+    const countInPersantage = Math.round((count / count) * 100);
+
+    const completedCount = jobs.filter((job) => job?.status === "completed").length;
+    const completedInPersantage = Math.round((completedCount / count) * 100);
 
     const pendingCount = count - completedCount;
+    const pendingInPersantage = Math.round((pendingCount / count) * 100);
 
     const recentJobs = jobs.slice(0, 3);
     const lastJob = jobs[0];
 
     const [runningLast, setRunningLast] = useState(false);
 
-    const handleRunLast = () => {
-        if (lastJob) {
-            // TODO: When backend is available, remove useLocalStorage and uncomment the old code
+    // const handleRunLast = () => {
+    //     if (lastJob) {
+    //         // TODO: When backend is available, remove useLocalStorage and uncomment the old code
 
-            // setRunningLast(true);
-            // setTimeout(() => setRunningLast(false), 600);
+    //         // setRunningLast(true);
+    //         // setTimeout(() => setRunningLast(false), 600);
 
 
-            setRunningLast(true);
-            setJobStatusMap({ ...jobStatusMap, [lastJob.id]: "running" });
-            setLastRunJobId(lastJob.id);
+    //         setRunningLast(true);
+    //         setJobStatusMap({ ...jobStatusMap, [lastJob.id]: "running" });
+    //         setLastRunJobId(lastJob.id);
 
-            const delay = Math.random() * 2000 + 1000; // 1–3 sec realistic delay
+    //         const delay = Math.random() * 2000 + 1000; // 1–3 sec realistic delay
 
-            setTimeout(() => {
-                setJobStatusMap((prev) => ({
-                    ...prev,
-                    [lastJob.id]: "completed",
-                }));
-                setRunningLast(false);
-            }, delay);
-        }
-    };
+    //         setTimeout(() => {
+    //             setJobStatusMap((prev) => ({
+    //                 ...prev,
+    //                 [lastJob.id]: "completed",
+    //             }));
+    //             setRunningLast(false);
+    //         }, delay);
+    //     }
+    // };
 
     const getGreeting = () => {
         const hour = new Date().getHours();
@@ -118,7 +118,7 @@ function Home() {
                             <p className="text-xs font-semibold tracking-wider text-muted-foreground uppercase">Total Workspaces</p>
                             <div className="flex items-baseline gap-2">
                                 <h3 className="text-3xl font-bold tracking-tight text-foreground">{isLoading ? <Loader size="sm" /> : count}</h3>
-                                <span className="text-[10px] text-emerald-500 bg-emerald-500/10 px-1.5 py-0.5 rounded font-medium">+10%</span>
+                                <span className="text-[10px] text-emerald-500 bg-emerald-500/10 px-1.5 py-0.5 rounded font-medium">+{countInPersantage}% Total</span>
                             </div>
                         </div>
                         <div className="w-12 h-12 rounded-2xl bg-primary/10 border border-primary/20 text-primary flex items-center justify-center shrink-0 relative z-10 group-hover:scale-110 transition-transform duration-300">
@@ -132,7 +132,7 @@ function Home() {
                             <p className="text-xs font-semibold tracking-wider text-muted-foreground uppercase">Successful Runs</p>
                             <div className="flex items-baseline gap-2">
                                 <h3 className="text-3xl font-bold tracking-tight text-foreground">{isLoading ? <Loader size="sm" /> : completedCount}</h3>
-                                <span className="text-[10px] text-emerald-500 bg-emerald-500/10 px-1.5 py-0.5 rounded font-medium">98.2% Success</span>
+                                <span className="text-[10px] text-emerald-500 bg-emerald-500/10 px-1.5 py-0.5 rounded font-medium">{completedInPersantage}% Success</span>
                             </div>
                         </div>
                         <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 flex items-center justify-center shrink-0 relative z-10 group-hover:scale-110 transition-transform duration-300">
@@ -146,7 +146,7 @@ function Home() {
                             <p className="text-xs font-semibold tracking-wider text-muted-foreground uppercase">Pending In Queue</p>
                             <div className="flex items-baseline gap-2">
                                 <h3 className="text-3xl font-bold tracking-tight text-foreground">{isLoading ? <Loader size="sm" /> : pendingCount}</h3>
-                                <span className="text-[10px] text-amber-500 bg-amber-500/10 px-1.5 py-0.5 rounded font-medium">Next run in 2m</span>
+                                <span className="text-[10px] text-amber-500 bg-amber-500/10 px-1.5 py-0.5 rounded font-medium">{pendingInPersantage}% Pending</span>
                             </div>
                         </div>
                         <div className="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-500 flex items-center justify-center shrink-0 relative z-10 group-hover:scale-110 transition-transform duration-300">
@@ -154,27 +154,6 @@ function Home() {
                         </div>
                     </div>
                 </div>
-
-                {/* 3. Quick Actions */}
-                {/* <div>
-                    <h2 className="text-lg font-semibold flex items-center gap-2 mb-4">
-                        <Zap size={20} className="text-primary" /> Quick Actions
-                    </h2>
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                        <Link to="/create" className="flex items-center justify-center gap-2 bg-card border border-border hover:border-primary/50 hover:bg-accent py-4 rounded-xl text-sm font-medium transition-all group shadow-sm hover:shadow-md">
-                            <Plus size={18} className="text-muted-foreground group-hover:text-primary transition-colors" />
-                            Create New Job
-                        </Link>
-                        <button onClick={handleRunLast} disabled={runningLast} className="flex items-center justify-center gap-2 bg-card border border-border hover:border-primary/50 hover:bg-accent py-4 rounded-xl text-sm font-medium transition-all group shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed">
-                            <Play size={18} className="text-muted-foreground group-hover:text-primary transition-colors" />
-                            {runningLast ? "Running..." : "Run Last Job"}
-                        </button>
-                        <Link to={lastJob ? `/results/${lastJob.id}` : "/jobs"} className="flex items-center justify-center gap-2 bg-card border border-border hover:border-primary/50 hover:bg-accent py-4 rounded-xl text-sm font-medium transition-all group shadow-sm hover:shadow-md">
-                            <BarChart size={18} className="text-muted-foreground group-hover:text-primary transition-colors" />
-                            View Latest Results
-                        </Link>
-                    </div>
-                </div> */}
 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     {/* 4. Recent Activity */}
@@ -187,7 +166,7 @@ function Home() {
                                 <ul className="divide-y divide-border">
                                     {recentJobs.map((job, idx) => (
                                         <li
-                                            key={job.id}
+                                            key={idx}
                                             className="group relative overflow-hidden rounded-2xl border border-transparent bg-background/40 mb-2 p-4 transition-all duration-300 hover:border-border hover:bg-accent/20 hover:shadow-sm"
                                         >
                                             <div className="flex items-start gap-4">
@@ -197,7 +176,7 @@ function Home() {
                                                     <span className="absolute inline-flex h-2.5 w-2.5 animate-pulse rounded-full bg-primary/40" />
 
                                                     <span
-                                                        className={`relative h-2.5 w-2.5 rounded-full ${(jobStatusMap[job.id] || job.status || "pending").toLowerCase() ===
+                                                        className={`relative h-2.5 w-2.5 rounded-full ${(job.status || "pending").toLowerCase() ===
                                                             "completed"
                                                             ? "bg-emerald-500"
                                                             : "bg-primary"
@@ -214,13 +193,13 @@ function Home() {
                                                         </span>{" "}
                                                         was{" "}
                                                         <span
-                                                            className={`font-medium ${(jobStatusMap[job.id] || job.status || "pending").toLowerCase() ===
+                                                            className={`font-medium ${(job.status || "pending").toLowerCase() ===
                                                                 "completed"
                                                                 ? "text-emerald-500"
                                                                 : "text-muted-foreground"
                                                                 }`}
                                                         >
-                                                            {(jobStatusMap[job.id] || job.status || "pending").toLowerCase() ===
+                                                            {(job.status || "pending").toLowerCase() ===
                                                                 "completed"
                                                                 ? "completed successfully"
                                                                 : "created"}
@@ -302,24 +281,16 @@ function Home() {
                                             </tr>
                                         </thead>
                                         <tbody className="divide-y divide-border">
-                                            {recentJobs.map((job) => (
-                                                <tr key={job.id} className="hover:bg-accent/30 transition-colors">
+                                            {recentJobs.map((job, index) => (
+                                                <tr key={index} className="hover:bg-accent/30 transition-colors">
                                                     <td className="px-5 py-4 font-medium text-foreground truncate max-w-[150px]">{job.name}</td>
                                                     <td className="px-5 py-4">
-                                                        {/* TODO: When backend is available, uncomment below and remove the jobStatusMap logic */}
-                                                        {/* <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold border ${(job.status || "pending").toLowerCase() === "completed" ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/30" :
-                                                            (job.status || "pending").toLowerCase() === "running" ? "bg-blue-500/10 text-blue-600 border-blue-500/30" :
-                                                                (job.status || "pending").toLowerCase() === "failed" ? "bg-red-500/10 text-red-600 border-red-500/30" :
-                                                                    "bg-amber-500/10 text-amber-600 border-amber-500/30"
-                                                            }`}>
-                                                            {job.status || "pending"}
-                                                        </span> */}
-                                                        <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold border ${(jobStatusMap[job.id] || job.status || "pending").toLowerCase() === "completed" ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/30" :
-                                                            (jobStatusMap[job.id] || job.status || "pending").toLowerCase() === "running" ? "bg-blue-500/10 text-blue-600 border-blue-500/30" : (
-                                                                (jobStatusMap[job.id] || job.status || "pending").toLowerCase() === "failed" ? "bg-red-500/10 text-red-700 border-red-500/30" : "bg-amber-500/10 text-amber-600 border-amber-500/30")
+                                                        <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold border ${(job.status || "pending").toLowerCase() === "completed" ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/30" :
+                                                            (job.status || "pending").toLowerCase() === "running" ? "bg-blue-500/10 text-blue-600 border-blue-500/30" : (
+                                                                (job.status || "pending").toLowerCase() === "failed" ? "bg-red-500/10 text-red-700 border-red-500/30" : "bg-amber-500/10 text-amber-600 border-amber-500/30")
 
                                                             }`}>
-                                                            {jobStatusMap[job.id] || job.status || "pending"}
+                                                            {job.status || "pending"}
                                                         </span>
                                                     </td>
                                                     <td className="px-5 py-4 text-right">

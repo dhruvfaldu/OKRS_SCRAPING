@@ -9,10 +9,11 @@ import ResultsToolbar from "../components/results/ResultsToolbar";
 import ResultsTable from "../components/results/ResultsTable";
 import JsonViewer from "../components/results/JsonViewer";
 import RowDetailSheet from "../components/results/RowDetailSheet";
-import Pagination from "../components/results/Pagination";
+import Pagination from "../components/common/Pagination";
 import EmptyState from "../components/results/EmptyState";
 import ResultsPageLoader from "../components/results/ResultsPageLoader";
 import { Card, CardHeader } from "@/components/ui/card";
+import useDebounce from "../hooks/useDebounce";
 
 const PAGE_SIZE = 10;
 
@@ -24,6 +25,8 @@ export default function ResultsPage() {
 
   // Local state
   const [search, setSearch] = useState("");
+  const debouncedSearch = useDebounce(search, 300);
+
   const [currentPage, setCurrentPage] = useState(1);
   const [view, setView] = useState("table");
   const [selectedRow, setSelectedRow] = useState(null);
@@ -40,13 +43,13 @@ export default function ResultsPage() {
   const columns = useMemo(() => (results.length > 0 ? Object.keys(results[0]) : []), [results]);
 
   const filteredResults = useMemo(() => {
-    if (!search.trim()) return results;
+    if (!debouncedSearch.trim()) return results;
     return results.filter((row) =>
       Object.values(row).some((val) =>
-        String(val).toLowerCase().includes(search.toLowerCase())
+        String(val).toLowerCase().includes(debouncedSearch.toLowerCase())
       )
     );
-  }, [results, search]);
+  }, [results, debouncedSearch]);
 
   const totalPages = Math.ceil(filteredResults.length / PAGE_SIZE);
 
@@ -94,7 +97,10 @@ export default function ResultsPage() {
       {/* Toolbar — search, view toggle, export */}
       <ResultsToolbar
         search={search}
-        setSearch={setSearch}
+        setSearch={(val) => {
+          setSearch(val);
+          setCurrentPage(1);
+        }}
         view={view}
         onViewChange={setView}
         onExport={() => exportResultsAsJSON(results, `${job.name || "results"}.json`)}

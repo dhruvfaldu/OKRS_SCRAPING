@@ -168,7 +168,7 @@ export default function JobCard({ job }) {
         </div>
 
         {/* Footer */}
-        <div className="flex gap-2 items-center px-3 bg-muted/10">
+        <div className="flex flex-wrap  gap-2 items-center px-3 bg-muted/10">
 
           {/* Run Button */}
           {running ? (
